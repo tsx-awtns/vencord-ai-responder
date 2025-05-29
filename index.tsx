@@ -35,7 +35,7 @@ const TypingStore = findByPropsLazy("startTyping", "stopTyping")
 const enabledChannels = new Set<string>()
 const processingChannels = new Set<string>()
 const typingIntervals = new Map<string, NodeJS.Timeout>()
-const greetedChannels = new Set<string>() // Track channels that have received greeting
+const greetedChannels = new Set<string>() 
 
 const DEFAULT_API_KEY = "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"
 
@@ -344,7 +344,6 @@ async function sendGreetingIfNeeded(channelId: string): Promise<void> {
 
     startTypingAnimation(channelId)
 
-    // Wait a bit to make it feel natural
     await new Promise((resolve) => setTimeout(resolve, 1500 + Math.random() * 1000))
 
     stopTypingAnimation(channelId)
@@ -414,13 +413,10 @@ function handleMessage(event: any): void {
 
     console.log(`AIResponder v2.0.0: Message from ${message.author?.username || "unknown"}: "${message.content}"`)
 
-    // Check if this is the first message in this channel since activation
     if (!greetedChannels.has(message.channel_id)) {
-      // Send greeting first, then respond to the message
       setTimeout(
         async () => {
           await sendGreetingIfNeeded(message.channel_id)
-          // Wait a bit after greeting before responding to the actual message
           setTimeout(
             () => {
               sendAIResponse(message.channel_id, message.content)
@@ -431,7 +427,6 @@ function handleMessage(event: any): void {
         200 + Math.random() * 300,
       )
     } else {
-      // Normal response for subsequent messages
       setTimeout(
         () => {
           sendAIResponse(message.channel_id, message.content)
@@ -452,7 +447,7 @@ function toggleChannelAI(channelId: string): boolean {
     if (wasActive) {
       enabledChannels.delete(channelId)
       processingChannels.delete(channelId)
-      greetedChannels.delete(channelId) // Reset greeting status
+      greetedChannels.delete(channelId)
       stopTypingAnimation(channelId)
 
       if (settings.store.showNotifications) {
@@ -463,7 +458,7 @@ function toggleChannelAI(channelId: string): boolean {
       return false
     } else {
       enabledChannels.add(channelId)
-      greetedChannels.delete(channelId) // Ensure greeting will be sent on next message
+      greetedChannels.delete(channelId)
 
       if (settings.store.showNotifications) {
         showToast(`AI Responder Enabled for ${userName}`, Toasts.Type.SUCCESS)
