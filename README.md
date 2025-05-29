@@ -14,6 +14,14 @@
 
 AIResponder is an intelligent Vencord plugin that automatically responds to Discord direct messages using AI when you're away, sleeping, at work, or simply unavailable. The plugin uses a default OpenRouter.ai API key provided by the developer, but you can also create and use your own API key for unlimited usage.
 
+### ⚠️ Important: Daily Limits
+
+**OpenRouter.ai has daily limits of approximately 1,000 requests per day for free accounts.** When this limit is reached:
+- The plugin will show you a helpful notification
+- You can create a new free OpenRouter.ai account with a different email
+- Get a new API key from the new account
+- Update your API key in the plugin settings
+
 ### 📋 Prerequisites
 
 Before starting, make sure you have:
@@ -138,9 +146,10 @@ Type `/airesponder` in any chat to toggle the AI responder on/off.
 ### ⚙️ Step 7: Optional - Use Your Own API Key
 
 #### Why use your own API key?
-- **Unlimited usage** (no rate limits)
+- **Unlimited usage** (no daily limits)
 - **Faster responses** (priority processing)
 - **Better reliability** (dedicated quota)
+- **No interruptions** when default key reaches daily limit
 
 #### How to get your own API key:
 1. Go to [openrouter.ai](https://openrouter.ai)
@@ -155,6 +164,22 @@ Type `/airesponder` in any chat to toggle the AI responder on/off.
 3. **Paste your API key** in the text field
 4. **Save** the settings
 
+### 🚨 Daily Limit Reached?
+
+If you see a notification that the daily limit has been reached:
+
+#### For Default API Key Users:
+1. **Create your own free account** at [openrouter.ai](https://openrouter.ai)
+2. **Get your own API key** (unlimited daily usage)
+3. **Enable "Use your own API key"** in plugin settings
+4. **Paste your new API key** and save
+
+#### For Custom API Key Users:
+1. **Create a new OpenRouter.ai account** with a different email
+2. **Get a new API key** from the new account
+3. **Update your API key** in plugin settings
+4. **Alternative**: Wait 24 hours for your current key's limit to reset
+
 ### 🔧 Troubleshooting
 
 #### Plugin not showing up?
@@ -166,6 +191,11 @@ Type `/airesponder` in any chat to toggle the AI responder on/off.
 - Check if the AI icon is **green** (active)
 - Make sure you're in a **Direct Message** (not a server)
 - Check your internet connection
+- **Check for daily limit notifications**
+
+#### Daily limit reached?
+- **Follow the steps above** to create a new account or use your own API key
+- The plugin will show helpful notifications with instructions
 
 #### Build errors?
 - Make sure Node.js and Git are properly installed
@@ -175,7 +205,7 @@ Type `/airesponder` in any chat to toggle the AI responder on/off.
 ### 📞 Support
 
 If you need help:
-- **GitHub Issues**: [Report a bug](https://github.com/tsx-awtns/vencord-ai-responder/issues)
+- **Discord Server**: [Join for support](https://discord.gg/aBvYsY2GnQ)
 - **Website**: [www.syva.uk/syva-dev/](https://www.syva.uk/syva-dev/)
 
 ---
@@ -185,6 +215,14 @@ If you need help:
 ### 🎯 Was ist AIResponder?
 
 AIResponder ist ein intelligentes Vencord-Plugin, das automatisch auf Discord-Direktnachrichten mit KI antwortet, wenn du weg bist, schläfst, arbeitest oder einfach nicht verfügbar bist. Das Plugin verwendet einen Standard-OpenRouter.ai-API-Schlüssel vom Entwickler, aber du kannst auch deinen eigenen API-Schlüssel erstellen und für unbegrenzte Nutzung verwenden.
+
+### ⚠️ Wichtig: Tägliche Limits
+
+**OpenRouter.ai hat tägliche Limits von etwa 1.000 Anfragen pro Tag für kostenlose Konten.** Wenn dieses Limit erreicht wird:
+- Das Plugin zeigt dir eine hilfreiche Benachrichtigung
+- Du kannst ein neues kostenloses OpenRouter.ai-Konto mit einer anderen E-Mail erstellen
+- Hole dir einen neuen API-Schlüssel vom neuen Konto
+- Aktualisiere deinen API-Schlüssel in den Plugin-Einstellungen
 
 ### 📋 Voraussetzungen
 
@@ -310,9 +348,12 @@ Tippe `/airesponder` in einen beliebigen Chat, um den AI-Responder ein-/auszusch
 ### ⚙️ Schritt 7: Optional - Eigenen API-Schlüssel verwenden
 
 #### Warum eigenen API-Schlüssel verwenden?
-- **Unbegrenzte Nutzung** (keine Rate-Limits)
+- **Unbegrenzte Nutzung** (keine täglichen Limits)
 - **Schnellere Antworten** (Prioritätsverarbeitung)
 - **Bessere Zuverlässigkeit** (dedizierte Quote)
+- **Keine Unterbrech  (Prioritätsverarbeitung)
+- **Bessere Zuverlässigkeit** (dedizierte Quote)
+- **Keine Unterbrechungen** wenn der Standard-Schlüssel das tägliche Limit erreicht
 
 #### Wie bekommt man einen eigenen API-Schlüssel:
 1. Gehe zu [openrouter.ai](https://openrouter.ai)
@@ -327,6 +368,22 @@ Tippe `/airesponder` in einen beliebigen Chat, um den AI-Responder ein-/auszusch
 3. **Füge deinen API-Schlüssel** in das Textfeld ein
 4. **Speichere** die Einstellungen
 
+### 🚨 Tägliches Limit erreicht?
+
+Wenn du eine Benachrichtigung siehst, dass das tägliche Limit erreicht wurde:
+
+#### Für Standard-API-Schlüssel-Nutzer:
+1. **Erstelle dein eigenes kostenloses Konto** bei [openrouter.ai](https://openrouter.ai)
+2. **Hole dir deinen eigenen API-Schlüssel** (unbegrenzte tägliche Nutzung)
+3. **Aktiviere "Use your own API key"** in den Plugin-Einstellungen
+4. **Füge deinen neuen API-Schlüssel ein** und speichere
+
+#### Für Custom-API-Schlüssel-Nutzer:
+1. **Erstelle ein neues OpenRouter.ai-Konto** mit einer anderen E-Mail
+2. **Hole dir einen neuen API-Schlüssel** vom neuen Konto
+3. **Aktualisiere deinen API-Schlüssel** in den Plugin-Einstellungen
+4. **Alternative**: Warte 24 Stunden, bis das Limit deines aktuellen Schlüssels zurückgesetzt wird
+
 ### 🔧 Fehlerbehebung
 
 #### Plugin wird nicht angezeigt?
@@ -338,6 +395,11 @@ Tippe `/airesponder` in einen beliebigen Chat, um den AI-Responder ein-/auszusch
 - Überprüfe, ob das AI-Symbol **grün** (aktiv) ist
 - Stelle sicher, dass du in einer **Direktnachricht** bist (nicht in einem Server)
 - Überprüfe deine Internetverbindung
+- **Prüfe auf Benachrichtigungen über tägliche Limits**
+
+#### Tägliches Limit erreicht?
+- **Folge den obigen Schritten** um ein neues Konto zu erstellen oder deinen eigenen API-Schlüssel zu verwenden
+- Das Plugin zeigt hilfreiche Benachrichtigungen mit Anweisungen
 
 #### Build-Fehler?
 - Stelle sicher, dass Node.js und Git ordnungsgemäß installiert sind
@@ -347,7 +409,7 @@ Tippe `/airesponder` in einen beliebigen Chat, um den AI-Responder ein-/auszusch
 ### 📞 Support
 
 Wenn du Hilfe benötigst:
-- **GitHub Issues**: [Fehler melden](https://github.com/tsx-awtns/vencord-ai-responder/issues)
+- **Discord Server**: [Für Support beitreten](https://discord.gg/aBvYsY2GnQ)
 - **Website**: [www.syva.uk/syva-dev/](https://www.syva.uk/syva-dev/)
 
 ---
@@ -357,6 +419,14 @@ Wenn du Hilfe benötigst:
 ### 🎯 Что такое AIResponder?
 
 AIResponder - это интеллектуальный плагин для Vencord, который автоматически отвечает на личные сообщения Discord с помощью ИИ, когда вы отсутствуете, спите, работаете или просто недоступны. Плагин использует стандартный API-ключ OpenRouter.ai от разработчика, но вы также можете создать и использовать свой собственный API-ключ для неограниченного использования.
+
+### ⚠️ Важно: Дневные лимиты
+
+**OpenRouter.ai имеет дневные лимиты примерно 1,000 запросов в день для бесплатных аккаунтов.** Когда этот лимит достигнут:
+- Плагин покажет вам полезное уведомление
+- Вы можете создать новый бесплатный аккаунт OpenRouter.ai с другим email
+- Получить новый API-ключ от нового аккаунта
+- Обновить ваш API-ключ в настройках плагина
 
 ### 📋 Требования
 
@@ -482,9 +552,10 @@ vencord/
 ### ⚙️ Шаг 7: Опционально - Использование собственного API-ключа
 
 #### Зачем использовать собственный API-ключ?
-- **Неограниченное использование** (без лимитов)
+- **Неограниченное использование** (без дневных лимитов)
 - **Более быстрые ответы** (приоритетная обработка)
 - **Лучшая надежность** (выделенная квота)
+- **Никаких прерываний** когда стандартный ключ достигает дневного лимита
 
 #### Как получить собственный API-ключ:
 1. Перейдите на [openrouter.ai](https://openrouter.ai)
@@ -499,6 +570,22 @@ vencord/
 3. **Вставьте ваш API-ключ** в текстовое поле
 4. **Сохраните** настройки
 
+### 🚨 Дневной лимит достигнут?
+
+Если вы видите уведомление о том, что дневной лимит достигнут:
+
+#### Для пользователей стандартного API-ключа:
+1. **Создайте свой собственный бесплатный аккаунт** на [openrouter.ai](https://openrouter.ai)
+2. **Получите свой собственный API-ключ** (неограниченное дневное использование)
+3. **Включите "Use your own API key"** в настройках плагина
+4. **Вставьте ваш новый API-ключ** и сохраните
+
+#### Для пользователей пользовательского API-ключа:
+1. **Создайте новый аккаунт OpenRouter.ai** с другим email
+2. **Получите новый API-ключ** от нового аккаунта
+3. **Обновите ваш API-ключ** в настройках плагина
+4. **Альтернатива**: Подождите 24 часа для сброса лимита вашего текущего ключа
+
 ### 🔧 Устранение неполадок
 
 #### Плагин не отображается?
@@ -510,6 +597,11 @@ vencord/
 - Проверьте, что значок ИИ **зеленый** (активный)
 - Убедитесь, что вы в **личных сообщениях** (не на сервере)
 - Проверьте подключение к интернету
+- **Проверьте уведомления о дневных лимитах**
+
+#### Дневной лимит достигнут?
+- **Следуйте шагам выше** для создания нового аккаунта или использования собственного API-ключа
+- Плагин покажет полезные уведомления с инструкциями
 
 #### Ошибки сборки?
 - Убедитесь, что Node.js и Git правильно установлены
@@ -519,7 +611,7 @@ vencord/
 ### 📞 Поддержка
 
 Если нужна помощь:
-- **GitHub Issues**: [Сообщить об ошибке](https://github.com/tsx-awtns/vencord-ai-responder/issues)
+- **Discord Server**: [Присоединиться для поддержки](https://discord.gg/aBvYsY2GnQ)
 - **Веб-сайт**: [www.syva.uk/syva-dev/](https://www.syva.uk/syva-dev/)
 
 ---
@@ -529,6 +621,14 @@ vencord/
 ### 🎯 ما هو AIResponder؟
 
 AIResponder هو إضافة ذكية لـ Vencord تجيب تلقائياً على الرسائل المباشرة في Discord باستخدام الذكاء الاصطناعي عندما تكون غائباً أو نائماً أو في العمل أو غير متاح. تستخدم الإضافة مفتاح API افتراضي من OpenRouter.ai مقدم من المطور، لكن يمكنك أيضاً إنشاء واستخدام مفتاح API خاص بك للاستخدام غير المحدود.
+
+### ⚠️ مهم: الحدود اليومية
+
+**OpenRouter.ai لديه حدود يومية تبلغ حوالي 1,000 طلب يومياً للحسابات المجانية.** عند الوصول لهذا الحد:
+- ستعرض الإضافة إشعاراً مفيداً
+- يمكنك إنشاء حساب OpenRouter.ai مجاني جديد بإيميل مختلف
+- احصل على مفتاح API جديد من الحساب الجديد
+- حدث مفتاح API في إعدادات الإضافة
 
 ### 📋 المتطلبات
 
@@ -654,9 +754,10 @@ vencord/
 ### ⚙️ الخطوة 7: اختياري - استخدام مفتاح API خاص بك
 
 #### لماذا استخدام مفتاح API خاص بك؟
-- **استخدام غير محدود** (بدون حدود معدل)
+- **استخدام غير محدود** (بدون حدود يومية)
 - **استجابات أسرع** (معالجة ذات أولوية)
 - **موثوقية أفضل** (حصة مخصصة)
+- **لا انقطاعات** عندما يصل المفتاح الافتراضي للحد اليومي
 
 #### كيفية الحصول على مفتاح API خاص بك:
 1. اذهب إلى [openrouter.ai](https://openrouter.ai)
@@ -671,6 +772,22 @@ vencord/
 3. **الصق مفتاح API** في حقل النص
 4. **احفظ** الإعدادات
 
+### 🚨 تم الوصول للحد اليومي؟
+
+إذا رأيت إشعاراً بأن الحد اليومي تم الوصول إليه:
+
+#### لمستخدمي مفتاح API الافتراضي:
+1. **أنشئ حسابك المجاني الخاص** في [openrouter.ai](https://openrouter.ai)
+2. **احصل على مفتاح API خاص بك** (استخدام يومي غير محدود)
+3. **فعل "Use your own API key"** في إعدادات الإضافة
+4. **الصق مفتاح API الجديد** واحفظ
+
+#### لمستخدمي مفتاح API المخصص:
+1. **أنشئ حساب OpenRouter.ai جديد** بإيميل مختلف
+2. **احصل على مفتاح API جديد** من الحساب الجديد
+3. **حدث مفتاح API** في إعدادات الإضافة
+4. **البديل**: انتظر 24 ساعة لإعادة تعيين حد مفتاحك الحالي
+
 ### 🔧 استكشاف الأخطاء وإصلاحها
 
 #### الإضافة لا تظهر؟
@@ -682,6 +799,11 @@ vencord/
 - تحقق من أن أيقونة الذكاء الاصطناعي **خضراء** (نشطة)
 - تأكد من أنك في **رسالة مباشرة** (وليس في خادم)
 - تحقق من اتصالك بالإنترنت
+- **تحقق من إشعارات الحدود اليومية**
+
+#### تم الوصول للحد اليومي؟
+- **اتبع الخطوات أعلاه** لإنشاء حساب جديد أو استخدام مفتاح API خاص بك
+- ستعرض الإضافة إشعارات مفيدة مع التعليمات
 
 #### أخطاء البناء؟
 - تأكد من تثبيت Node.js و Git بشكل صحيح
@@ -691,7 +813,7 @@ vencord/
 ### 📞 الدعم
 
 إذا كنت تحتاج مساعدة:
-- **GitHub Issues**: [الإبلاغ عن خطأ](https://github.com/tsx-awtns/vencord-ai-responder/issues)
+- **Discord Server**: [انضم للحصول على الدعم](https://discord.gg/aBvYsY2GnQ)
 - **الموقع الإلكتروني**: [www.syva.uk/syva-dev/](https://www.syva.uk/syva-dev/)
 
 ---
