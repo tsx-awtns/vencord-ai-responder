@@ -1,5 +1,11 @@
 # 🤖 AIResponder Plugin Installation Guide
 
+--------------------------------------
+# NOTICE: OpenRouter.ai enforces a daily limit (~1,000 requests/day) for free accounts.
+⚠️ The previous information in the README and related .md files incorrectly stated that usage was "unlimited" — this is not true.
+We apologize for the confusion. Please check the updated documentation for accurate details.
+--------------------------------------
+
 ## 📋 Table of Contents
 - [English](#english)
 - [Deutsch](#deutsch)
