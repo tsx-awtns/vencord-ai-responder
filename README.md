@@ -54,7 +54,7 @@ Before starting, make sure you have:
 #### Install pnpm globally
 1. Open **Terminal** (macOS/Linux) or **Command Prompt** (Windows)
 2. Run this command:
-   `bash
+   `
    npm i -g pnpm
    `
 3. Wait for the installation to complete
@@ -63,18 +63,18 @@ Before starting, make sure you have:
 1. Navigate to your Desktop or create a new folder where you want to install Vencord
 2. Open Terminal/Command Prompt in that location
 3. Run this command (this may take a few minutes):
-   `bash
+   `
    git clone https://github.com/Vendicated/Vencord
    `
 4. A folder named "vencord" should appear
 
 #### Install Vencord Dependencies
 1. Navigate into the vencord folder:
-   `bash
+   `
    cd vencord
    `
 2. Install dependencies:
-   `bash
+   `
    npm install pnpm
    `
 3. If prompted, select **"Y"** to confirm installation
@@ -109,14 +109,14 @@ vencord/
 1. Go back to the main vencord folder
 2. Open Terminal/Command Prompt in the vencord folder
 3. Run the build command:
-   `bash
+   `
    pnpm build
    `
 4. Wait for the build to complete successfully
 
 #### Inject Vencord into Discord
 1. Run the injection command:
-   `bash
+   `
    pnpm inject
    `
 2. **Option 1**: Press **Enter** to use the default Discord installation path
@@ -256,7 +256,7 @@ Bevor du beginnst, stelle sicher, dass du hast:
 #### pnpm global installieren
 1. Öffne **Terminal** (macOS/Linux) oder **Eingabeaufforderung** (Windows)
 2. Führe diesen Befehl aus:
-   `bash
+   `
    npm i -g pnpm
    `
 3. Warte, bis die Installation abgeschlossen ist
@@ -265,18 +265,18 @@ Bevor du beginnst, stelle sicher, dass du hast:
 1. Navigiere zu deinem Desktop oder erstelle einen neuen Ordner, wo du Vencord installieren möchtest
 2. Öffne Terminal/Eingabeaufforderung an diesem Ort
 3. Führe diesen Befehl aus (kann einige Minuten dauern):
-   `bash
+   `
    git clone https://github.com/Vendicated/Vencord
    `
 4. Ein Ordner namens "vencord" sollte erscheinen
 
 #### Vencord-Abhängigkeiten installieren
 1. Navigiere in den vencord-Ordner:
-   `bash
+   `
    cd vencord
    `
 2. Installiere Abhängigkeiten:
-   `bash
+   `
    npm install pnpm
    `
 3. Wenn gefragt, wähle **"Y"** zur Bestätigung der Installation
@@ -311,14 +311,14 @@ vencord/
 1. Gehe zurück zum Haupt-vencord-Ordner
 2. Öffne Terminal/Eingabeaufforderung im vencord-Ordner
 3. Führe den Build-Befehl aus:
-   `bash
+   `
    pnpm build
    `
 4. Warte, bis der Build erfolgreich abgeschlossen ist
 
 #### Vencord in Discord injizieren
 1. Führe den Injektions-Befehl aus:
-   `bash
+   `
    pnpm inject
    `
 2. **Option 1**: Drücke **Enter** für den Standard-Discord-Installationspfad
@@ -460,7 +460,7 @@ AIResponder - это интеллектуальный плагин для Vencor
 #### Глобальная установка pnpm
 1. Откройте **Терминал** (macOS/Linux) или **Командную строку** (Windows)
 2. Выполните эту команду:
-   `bash
+   `
    npm i -g pnpm
    `
 3. Дождитесь завершения установки
@@ -469,18 +469,18 @@ AIResponder - это интеллектуальный плагин для Vencor
 1. Перейдите на рабочий стол или создайте новую папку, где хотите установить Vencord
 2. Откройте Терминал/Командную строку в этом месте
 3. Выполните эту команду (может занять несколько минут):
-   `bash
+   `
    git clone https://github.com/Vendicated/Vencord
    `
 4. Должна появиться папка с именем "vencord"
 
 #### Установка зависимостей Vencord
 1. Перейдите в папку vencord:
-   `bash
+   `
    cd vencord
    `
 2. Установите зависимости:
-   `bash
+   `
    npm install pnpm
    `
 3. При запросе выберите **"Y"** для подтверждения установки
@@ -515,14 +515,14 @@ vencord/
 1. Вернитесь в главную папку vencord
 2. Откройте Терминал/Командную строку в папке vencord
 3. Выполните команду сборки:
-   `bash
+   `
    pnpm build
    `
 4. Дождитесь успешного завершения сборки
 
 #### Внедрение Vencord в Discord
 1. Выполните команду внедрения:
-   `bash
+   `
    pnpm inject
    `
 2. **Вариант 1**: Нажмите **Enter** для использования стандартного пути установки Discord
@@ -662,7 +662,7 @@ AIResponder هو إضافة ذكية لـ Vencord تجيب تلقائياً عل
 #### تثبيت pnpm عالمياً
 1. افتح **Terminal** (macOS/Linux) أو **Command Prompt** (Windows)
 2. شغل هذا الأمر:
-   `bash
+   `
    npm i -g pnpm
    `
 3. انتظر حتى يكتمل التثبيت
@@ -671,18 +671,18 @@ AIResponder هو إضافة ذكية لـ Vencord تجيب تلقائياً عل
 1. انتقل إلى سطح المكتب أو أنشئ مجلد جديد حيث تريد تثبيت Vencord
 2. افتح Terminal/Command Prompt في ذلك الموقع
 3. شغل هذا الأمر (قد يستغرق بضع دقائق):
-   `bash
+   `
    git clone https://github.com/Vendicated/Vencord
    `
 4. يجب أن يظهر مجلد باسم "vencord"
 
 #### تثبيت تبعيات Vencord
 1. انتقل إلى مجلد vencord:
-   `bash
+   `
    cd vencord
    `
 2. ثبت التبعيات:
-   `bash
+   `
    npm install pnpm
    `
 3. إذا طُلب منك، اختر **"Y"** لتأكيد التثبيت
@@ -717,14 +717,14 @@ vencord/
 1. ارجع إلى المجلد الرئيسي لـ vencord
 2. افتح Terminal/Command Prompt في مجلد vencord
 3. شغل أمر البناء:
-   `bash
+   `
    pnpm build
    `
 4. انتظر حتى يكتمل البناء بنجاح
 
 #### حقن Vencord في Discord
 1. شغل أمر الحقن:
-   `bash
+   `
    pnpm inject
    `
 2. **الخيار 1**: اضغط **Enter** لاستخدام مسار تثبيت Discord الافتراضي
