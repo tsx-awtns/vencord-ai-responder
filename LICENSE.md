@@ -171,8 +171,7 @@ Für Fragen, Probleme oder Beiträge:
 ### 🔗 Links / Links / Ссылки / الروابط
 - **🌐 Website**: [www.syva.uk/syva-dev/](https://www.syva.uk/syva-dev/)
 - **📦 Repository**: [github.com/tsx-awtns/vencord-ai-responder](https://github.com/tsx-awtns/vencord-ai-responder)
-- **📧 Contact**: Available through website
-- **🐛 Issues**: [GitHub Issues](https://github.com/tsx-awtns/vencord-ai-responder/issues)
+- **🐛 Issues & contact**: [Discord server](https://discord.gg/aBvYsY2GnQ)
 
 ### 📊 Version Information
 - **Current Version**: 2.1
