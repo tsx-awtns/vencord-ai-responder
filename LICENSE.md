@@ -41,7 +41,7 @@ This software integrates with:
 
 #### Support
 For questions, issues, or contributions:
-- **GitHub Issues**: [Report bugs or request features](https://github.com/tsx-awtns/vencord-ai-responder/issues)
+- **Discord Server**: [Join for support](https://discord.gg/aBvYsY2GnQ)
 - **Website**: [Contact through syva.uk](https://www.syva.uk/syva-dev/)
 
 ---
@@ -79,7 +79,7 @@ Diese Software integriert sich mit:
 
 #### Support
 Für Fragen, Probleme oder Beiträge:
-- **GitHub Issues**: [Fehler melden oder Features anfragen](https://github.com/tsx-awtns/vencord-ai-responder/issues)
+- **Discord-Server**: [Trete für Support bei](https://discord.gg/aBvYsY2GnQ)
 - **Website**: [Kontakt über syva.uk](https://www.syva.uk/syva-dev/)
 
 ---
@@ -117,7 +117,7 @@ Für Fragen, Probleme oder Beiträge:
 
 #### Поддержка
 По вопросам, проблемам или вкладам:
-- **GitHub Issues**: [Сообщить об ошибках или запросить функции](https://github.com/tsx-awtns/vencord-ai-responder/issues)
+- **Сервер Discord**: [Присоединяйтесь для поддержки](https://discord.gg/aBvYsY2GnQ)
 - **Веб-сайт**: [Связаться через syva.uk](https://www.syva.uk/syva-dev/)
 
 ---
@@ -155,7 +155,7 @@ Für Fragen, Probleme oder Beiträge:
 
 #### الدعم
 للأسئلة أو المشاكل أو المساهمات:
-- **GitHub Issues**: [الإبلاغ عن الأخطاء أو طلب الميزات](https://github.com/tsx-awtns/vencord-ai-responder/issues)
+- **خادم ديسكورد**: [انضم للحصول على الدعم](https://discord.gg/aBvYsY2GnQ)
 - **الموقع الإلكتروني**: [التواصل عبر syva.uk](https://www.syva.uk/syva-dev/)
 
 ---
