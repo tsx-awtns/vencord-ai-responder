@@ -175,7 +175,7 @@ Für Fragen, Probleme oder Beiträge:
 - **🐛 Issues**: [GitHub Issues](https://github.com/tsx-awtns/vencord-ai-responder/issues)
 
 ### 📊 Version Information
-- **Current Version**: 1.6.0
+- **Current Version**: 2.1
 - **License**: MIT
 - **Last Updated**: 2025
 - **Compatibility**: Vencord, Discord
