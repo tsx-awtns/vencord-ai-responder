@@ -2,6 +2,7 @@
  * AIResponder v2.1.0 - Intelligent AI Auto-Responder for Vencord
  *
  * @author mays_024
+ * @id 1210310965162414134
  * @website https://www.syva.uk/syva-dev/
  * @repository https://github.com/tsx-awtns/vencord-ai-responder
  * @version 2.1.0
