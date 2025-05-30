@@ -355,7 +355,7 @@ const AIResponderButton = ({ channel }) => {
   }
 
   const tooltipText = isGlobalMode
-    ? `🌐 AI Responder: GLOBAL DM MODE for ${userName} (${keyInfo})\nResponding to ALL DMs automatically\nClick to disable global mode`
+    ? `🌐 AI Responder: GLOBAL DM MODE\nResponding to ALL DMs automatically\nClick to disable global mode`
     : isProcessing
       ? `🤖 AI is responding for ${userName}...`
       : isActive
