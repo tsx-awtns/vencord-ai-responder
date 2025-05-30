@@ -10,12 +10,14 @@ param(
     [switch]$Help
 )
 
+# Color functions for better output
 function Write-Success { param($Message) Write-Host $Message -ForegroundColor Green }
 function Write-Warning { param($Message) Write-Host $Message -ForegroundColor Yellow }
 function Write-Error { param($Message) Write-Host $Message -ForegroundColor Red }
 function Write-Info { param($Message) Write-Host $Message -ForegroundColor Cyan }
 function Write-Step { param($Message) Write-Host "`n=== $Message ===" -ForegroundColor Magenta }
 
+# Help function
 function Show-Help {
     Write-Host @"
 AIResponder Plugin Automated Setup Script
@@ -221,7 +223,7 @@ function Install-AIResponder {
     Write-Step "Installing AIResponder Plugin"
     
     $userPluginsPath = Join-Path $VencordPath "src\userplugins"
-    $aiResponderPath = Join-Path $userPluginsPath "AIResponder"
+    $aiResponderPath = Join-Path $userPluginsPath "vencord-ai-responder"
     
     if (Test-Path "$aiResponderPath\index.tsx") {
         Write-Success "AIResponder plugin already exists!"
@@ -235,39 +237,21 @@ function Install-AIResponder {
     }
     
     try {
-        Write-Info "Downloading AIResponder plugin..."
-        $repoUrl = "https://github.com/tsx-awtns/vencord-ai-responder/archive/refs/heads/main.zip"
-        $zipPath = "$env:TEMP\airesponder.zip"
-        $extractPath = "$env:TEMP\airesponder-extract"
+        Write-Info "Cloning AIResponder plugin repository..."
+        Set-Location $userPluginsPath
         
-        # Download the repository
-        Invoke-WebRequest -Uri $repoUrl -OutFile $zipPath -UseBasicParsing
+        # Clone the repository directly into userplugins
+        git clone https://github.com/tsx-awtns/vencord-ai-responder.git
         
-        # Extract the zip
-        if (Test-Path $extractPath) {
-            Remove-Item $extractPath -Recurse -Force
-        }
-        Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
-        
-        # Find the AIResponder folder in the extracted content
-        $extractedRepo = Get-ChildItem $extractPath | Select-Object -First 1
-        $sourceAIResponder = Join-Path $extractedRepo.FullName "AIResponder"
-        
-        if (Test-Path $sourceAIResponder) {
-            # Copy AIResponder folder to userplugins
-            Copy-Item -Path $sourceAIResponder -Destination $userPluginsPath -Recurse -Force
-            Write-Success "AIResponder plugin installed successfully!"
+        if (Test-Path "$aiResponderPath\index.tsx") {
+            Write-Success "AIResponder plugin cloned successfully!"
         } else {
-            throw "AIResponder folder not found in downloaded repository"
+            throw "AIResponder plugin files not found after cloning"
         }
-        
-        # Cleanup
-        Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
-        Remove-Item $extractPath -Recurse -Force -ErrorAction SilentlyContinue
     }
     catch {
-        Write-Error "Failed to install AIResponder plugin: $($_.Exception.Message)"
-        Write-Info "You can manually download from: https://github.com/tsx-awtns/vencord-ai-responder"
+        Write-Error "Failed to clone AIResponder plugin: $($_.Exception.Message)"
+        Write-Info "You can manually clone from: https://github.com/tsx-awtns/vencord-ai-responder.git"
         exit 1
     }
 }
