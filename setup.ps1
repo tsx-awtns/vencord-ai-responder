@@ -298,7 +298,17 @@ function Install-AIResponder {
             Remove-Item $aiResponderPath -Recurse -Force
         }
         
-        git clone https://github.com/tsx-awtns/vencord-ai-responder.git AIResponder
+        # Clone the repository and copy files from the AIResponder subfolder
+        git clone https://github.com/tsx-awtns/vencord-ai-responder.git temp-airesponder
+        
+        # Copy files from the AIResponder subfolder to the target location
+        if (Test-Path "temp-airesponder\AIResponder") {
+            Copy-Item "temp-airesponder\AIResponder" -Destination "AIResponder" -Recurse -Force
+            Remove-Item "temp-airesponder" -Recurse -Force
+        } else {
+            throw "AIResponder subfolder not found in repository"
+        }
+        
         Set-Location $currentLocation
         
         if (Test-Path "$aiResponderPath\index.tsx") {
@@ -309,7 +319,7 @@ function Install-AIResponder {
     }
     catch {
         Write-Error "Failed to clone AIResponder plugin: $($_.Exception.Message)"
-        Write-Info "Manual clone: https://github.com/tsx-awtns/vencord-ai-responder.git"
+        Write-Info "Manual clone: https://github.com/tsx-awtns/vencord-ai-responder.git (files are in AIResponder/ subfolder)"
         Read-Host "Press Enter to exit"
         exit 1
     }
