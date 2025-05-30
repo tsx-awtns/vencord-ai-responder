@@ -1,10 +1,10 @@
 /**
- * AIResponder v2.2.1 - Intelligent AI Auto-Responder for Vencord
+ * AIResponder v2.3.1 - Intelligent AI Auto-Responder for Vencord
  *
  * @author mays_024
  * @website https://www.syva.uk/syva-dev/
  * @repository https://github.com/tsx-awtns/vencord-ai-responder
- * @version 2.2.1
+ * @version 2.3.1
  * @license MIT
  *
  * Features:
@@ -21,6 +21,12 @@
  */
 
 "use client"
+
+declare global {
+  interface Window {
+    aiResponderToggleGlobalDM?: () => void;
+  }
+}
 
 import definePlugin, { OptionType } from "@utils/types"
 import { definePluginSettings } from "@api/Settings"
@@ -86,13 +92,15 @@ const settings = definePluginSettings({
 interface IconProps {
   isActive: boolean
   isProcessing: boolean
+  isGlobalMode?: boolean
   size?: number
 }
 
-function EnhancedAIIcon({ isActive, isProcessing, size = 24 }: IconProps) {
+function EnhancedAIIcon({ isActive, isProcessing, isGlobalMode = false, size = 24 }: IconProps) {
   const baseColor = isActive ? "#00ff88" : "#8b949e"
   const glowColor = isActive ? "#00ff88" : "transparent"
   const processingColor = "#ffd700"
+  const globalModeColor = "#00d4ff"
 
   return (
     <div
@@ -103,16 +111,39 @@ function EnhancedAIIcon({ isActive, isProcessing, size = 24 }: IconProps) {
         justifyContent: "center",
         width: `${size}px`,
         height: `${size}px`,
-        borderRadius: "50%",
-        background: isActive
-          ? "linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,184,148,0.1) 100%)"
-          : "transparent",
-        border: isActive ? "1px solid rgba(0,255,136,0.3)" : "1px solid transparent",
-        filter: isActive ? `drop-shadow(0 0 12px ${glowColor}40)` : "none",
+        borderRadius: isGlobalMode ? "8px" : "50%",
+        background: isGlobalMode
+          ? "linear-gradient(135deg, rgba(0,212,255,0.15) 0%, rgba(0,255,136,0.15) 100%)"
+          : isActive
+            ? "linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,184,148,0.1) 100%)"
+            : "transparent",
+        border: isGlobalMode
+          ? "2px solid rgba(0,212,255,0.6)"
+          : isActive
+            ? "1px solid rgba(0,255,136,0.3)"
+            : "1px solid transparent",
+        filter: isGlobalMode
+          ? `drop-shadow(0 0 16px ${globalModeColor}60) drop-shadow(0 0 8px ${globalModeColor}40)`
+          : isActive
+            ? `drop-shadow(0 0 12px ${glowColor}40)`
+            : "none",
         transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         transform: isProcessing ? "scale(1.05)" : "scale(1)",
+        boxShadow: isGlobalMode ? `inset 0 1px 0 rgba(255,255,255,0.1), 0 0 0 1px rgba(0,212,255,0.2)` : "none",
       }}
     >
+      {isGlobalMode && (
+        <div
+          style={{
+            position: "absolute",
+            inset: "2px",
+            borderRadius: "6px",
+            background: "linear-gradient(45deg, transparent 30%, rgba(0,212,255,0.1) 50%, transparent 70%)",
+            animation: "shimmer 2s ease-in-out infinite",
+          }}
+        />
+      )}
+
       <svg
         width={size * 0.75}
         height={size * 0.75}
@@ -120,12 +151,16 @@ function EnhancedAIIcon({ isActive, isProcessing, size = 24 }: IconProps) {
         fill="none"
         style={{
           transition: "all 0.3s ease",
+          zIndex: 1,
         }}
       >
         <defs>
           <linearGradient id="aiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={isProcessing ? processingColor : baseColor} />
-            <stop offset="100%" stopColor={isProcessing ? "#ffed4e" : isActive ? "#00b894" : "#6b7280"} />
+            <stop offset="0%" stopColor={isProcessing ? processingColor : isGlobalMode ? globalModeColor : baseColor} />
+            <stop
+              offset="100%"
+              stopColor={isProcessing ? "#ffed4e" : isGlobalMode ? "#00b4d8" : isActive ? "#00b894" : "#6b7280"}
+            />
           </linearGradient>
           <filter id="glow">
             <feGaussianBlur stdDeviation="2" result="coloredBlur" />
@@ -134,6 +169,22 @@ function EnhancedAIIcon({ isActive, isProcessing, size = 24 }: IconProps) {
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
+          <style>
+            {`
+              @keyframes shimmer {
+                0%, 100% { transform: translateX(-100%); }
+                50% { transform: translateX(100%); }
+              }
+              @keyframes pulse-ring {
+                0% { transform: scale(0.8); opacity: 1; }
+                100% { transform: scale(1.4); opacity: 0; }
+              }
+              @keyframes rotate {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+              }
+            `}
+          </style>
         </defs>
 
         <circle
@@ -144,7 +195,7 @@ function EnhancedAIIcon({ isActive, isProcessing, size = 24 }: IconProps) {
           stroke="url(#aiGradient)"
           strokeWidth="2"
           strokeDasharray={isProcessing ? "4 2" : "none"}
-          filter={isActive ? "url(#glow)" : "none"}
+          filter={isActive || isGlobalMode ? "url(#glow)" : "none"}
         >
           {isProcessing && (
             <animateTransform
@@ -187,7 +238,26 @@ function EnhancedAIIcon({ isActive, isProcessing, size = 24 }: IconProps) {
         <line x1="8" y1="16" x2="12" y2="12" stroke="url(#aiGradient)" strokeWidth="1" opacity="0.6" />
         <line x1="16" y1="16" x2="12" y2="12" stroke="url(#aiGradient)" strokeWidth="1" opacity="0.6" />
 
-        {isActive && (
+        {isGlobalMode && (
+          <g>
+            <circle cx="18" cy="6" r="3" fill={globalModeColor} opacity="0.9">
+              <animate attributeName="opacity" values="0.9;0.5;0.9" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <text
+              x="18"
+              y="7"
+              textAnchor="middle"
+              fontSize="6"
+              fill="white"
+              fontWeight="bold"
+              style={{ fontFamily: "monospace" }}
+            >
+              ∞
+            </text>
+          </g>
+        )}
+
+        {isActive && !isGlobalMode && (
           <circle cx="18" cy="6" r="2" fill="#00ff88">
             <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite" />
           </circle>
@@ -198,14 +268,29 @@ function EnhancedAIIcon({ isActive, isProcessing, size = 24 }: IconProps) {
         <div
           style={{
             position: "absolute",
-            top: "-2px",
-            left: "-2px",
-            right: "-2px",
-            bottom: "-2px",
-            borderRadius: "50%",
+            top: "-4px",
+            left: "-4px",
+            right: "-4px",
+            bottom: "-4px",
+            borderRadius: isGlobalMode ? "12px" : "50%",
             border: "2px solid transparent",
-            borderTop: "2px solid #ffd700",
-            animation: "spin 1s linear infinite",
+            borderTop: `2px solid ${isGlobalMode ? globalModeColor : "#ffd700"}`,
+            animation: "rotate 1s linear infinite",
+          }}
+        />
+      )}
+
+      {isGlobalMode && (
+        <div
+          style={{
+            position: "absolute",
+            top: "-6px",
+            left: "-6px",
+            right: "-6px",
+            bottom: "-6px",
+            borderRadius: "14px",
+            border: "2px solid rgba(0,212,255,0.3)",
+            animation: "pulse-ring 2s ease-out infinite",
           }}
         />
       )}
@@ -216,17 +301,39 @@ function EnhancedAIIcon({ isActive, isProcessing, size = 24 }: IconProps) {
 const AIResponderButton = ({ channel }) => {
   const [isActive, setIsActive] = React.useState(enabledChannels.has(channel.id) || globalDMMode)
   const [isProcessing, setIsProcessing] = React.useState(processingChannels.has(channel.id))
+  const [isGlobalMode, setIsGlobalMode] = React.useState(globalDMMode)
 
   React.useEffect(() => {
     const updateState = () => {
-      setIsActive(enabledChannels.has(channel.id) || globalDMMode)
-      setIsProcessing(processingChannels.has(channel.id))
+      const newIsActive = enabledChannels.has(channel.id) || globalDMMode
+      const newIsProcessing = processingChannels.has(channel.id)
+      const newIsGlobalMode = globalDMMode
+
+      setIsActive(newIsActive)
+      setIsProcessing(newIsProcessing)
+      setIsGlobalMode(newIsGlobalMode)
     }
 
     updateState()
-    const interval = setInterval(updateState, 100)
+    const interval = setInterval(updateState, 50)
 
-    return () => clearInterval(interval)
+    const handleSettingsChange = () => {
+      setTimeout(updateState, 100)
+    }
+
+    const originalToggleGlobalDM = toggleGlobalDMMode
+    window.aiResponderToggleGlobalDM = () => {
+      const result = originalToggleGlobalDM()
+      setTimeout(updateState, 50)
+      return result
+    }
+
+    return () => {
+      clearInterval(interval)
+      if (window.aiResponderToggleGlobalDM) {
+        delete window.aiResponderToggleGlobalDM
+      }
+    }
   }, [channel.id])
 
   const useCustomKey = Boolean(settings.store.useCustomApiKey && settings.store.customApiKey)
@@ -234,7 +341,7 @@ const AIResponderButton = ({ channel }) => {
   const userName = getUserDisplayName()
 
   const handleClick = () => {
-    if (globalDMMode) {
+    if (isGlobalMode) {
       toggleGlobalDMMode()
     } else {
       toggleChannelAI(channel.id)
@@ -243,10 +350,11 @@ const AIResponderButton = ({ channel }) => {
     setTimeout(() => {
       setIsActive(enabledChannels.has(channel.id) || globalDMMode)
       setIsProcessing(processingChannels.has(channel.id))
+      setIsGlobalMode(globalDMMode)
     }, 10)
   }
 
-  const tooltipText = globalDMMode
+  const tooltipText = isGlobalMode
     ? `🌐 AI Responder: GLOBAL DM MODE for ${userName} (${keyInfo})\nResponding to ALL DMs automatically\nClick to disable global mode`
     : isProcessing
       ? `🤖 AI is responding for ${userName}...`
@@ -261,27 +369,18 @@ const AIResponderButton = ({ channel }) => {
       buttonProps={{
         style: {
           padding: "4px",
-          borderRadius: "4px",
-          transition: "all 0.2s ease",
-          border: globalDMMode ? "2px solid #00ff88" : "none",
+          borderRadius: isGlobalMode ? "8px" : "4px",
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          background: isGlobalMode
+            ? "linear-gradient(135deg, rgba(0,212,255,0.1) 0%, rgba(0,255,136,0.1) 100%)"
+            : "transparent",
+          border: "none",
+          position: "relative",
+          overflow: "visible",
         },
       }}
     >
-      <EnhancedAIIcon isActive={isActive} isProcessing={isProcessing} />
-      {globalDMMode && (
-        <div
-          style={{
-            position: "absolute",
-            top: "-2px",
-            right: "-2px",
-            width: "8px",
-            height: "8px",
-            borderRadius: "50%",
-            backgroundColor: "#00ff88",
-            border: "1px solid white",
-          }}
-        />
-      )}
+      <EnhancedAIIcon isActive={isActive} isProcessing={isProcessing} isGlobalMode={isGlobalMode} />
     </ChatBarButton>
   )
 }
@@ -292,7 +391,7 @@ function getUserDisplayName(): string {
     if (!currentUser) return "User"
     return currentUser.globalName || currentUser.username || "User"
   } catch (error) {
-    console.error("AIResponder v2.2.1: Error getting user name:", error)
+    console.error("AIResponder v2.3.1: Error getting user name:", error)
     return "User"
   }
 }
@@ -337,7 +436,7 @@ function handleRateLimitError(useCustomKey: boolean, userName: string): void {
     duration: 10000,
   })
 
-  console.warn(`AIResponder v2.2.1: Rate limit reached for ${userName} (Custom Key: ${useCustomKey})`)
+  console.warn(`AIResponder v2.3.1: Rate limit reached for ${userName} (Custom Key: ${useCustomKey})`)
 }
 
 async function generateAIResponse(
@@ -366,7 +465,7 @@ You are essentially ${userName}'s AI companion that can hold normal conversation
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "User-Agent": "AIResponder/2.2.1",
+        "User-Agent": "AIResponder/2.3.1",
       },
       body: JSON.stringify({
         apiKey,
@@ -406,7 +505,7 @@ You are essentially ${userName}'s AI companion that can hold normal conversation
 
     return data.response
   } catch (error) {
-    console.error("AIResponder v2.2.1: API Error:", error)
+    console.error("AIResponder v2.3.1: API Error:", error)
 
     if (error.message.includes("rate limit") || error.message.includes("quota") || error.message.includes("429")) {
       handleRateLimitError(useCustomKey, userName)
@@ -433,7 +532,7 @@ You are essentially ${userName}'s AI companion that can hold normal conversation
 
 function startTypingAnimation(channelId: string): NodeJS.Timeout | null {
   try {
-    console.log(`AIResponder v2.2.1: Starting typing for channel ${channelId}`)
+    console.log(`AIResponder v2.3.1: Starting typing for channel ${channelId}`)
 
     const existingInterval = typingIntervals.get(channelId)
     if (existingInterval) {
@@ -446,21 +545,21 @@ function startTypingAnimation(channelId: string): NodeJS.Timeout | null {
       try {
         TypingStore.startTyping(channelId)
       } catch (error) {
-        console.error("AIResponder v2.2.1: Typing interval error:", error)
+        console.error("AIResponder v2.3.1: Typing interval error:", error)
       }
     }, 8000)
 
     typingIntervals.set(channelId, interval)
     return interval
   } catch (error) {
-    console.error("AIResponder v2.2.1: Start typing error:", error)
+    console.error("AIResponder v2.3.1: Start typing error:", error)
     return null
   }
 }
 
 function stopTypingAnimation(channelId: string): void {
   try {
-    console.log(`AIResponder v2.2.1: Stopping typing for channel ${channelId}`)
+    console.log(`AIResponder v2.3.1: Stopping typing for channel ${channelId}`)
 
     const interval = typingIntervals.get(channelId)
     if (interval) {
@@ -470,7 +569,7 @@ function stopTypingAnimation(channelId: string): void {
 
     TypingStore.stopTyping(channelId)
   } catch (error) {
-    console.error("AIResponder v2.2.1: Stop typing error:", error)
+    console.error("AIResponder v2.3.1: Stop typing error:", error)
   }
 }
 
@@ -482,7 +581,7 @@ async function sendGreetingIfNeeded(channelId: string): Promise<void> {
     const userName = getUserDisplayName()
     const greetingMessage = generateGreetingMessage(userName)
 
-    console.log(`AIResponder v2.2.1: Sending greeting for ${userName} in channel ${channelId}`)
+    console.log(`AIResponder v2.3.1: Sending greeting for ${userName} in channel ${channelId}`)
 
     startTypingAnimation(channelId)
 
@@ -498,9 +597,9 @@ async function sendGreetingIfNeeded(channelId: string): Promise<void> {
     })
 
     greetedChannels.add(channelId)
-    console.log(`AIResponder v2.2.1: Greeting sent for ${userName}`)
+    console.log(`AIResponder v2.3.1: Greeting sent for ${userName}`)
   } catch (error) {
-    console.error("AIResponder v2.2.1: Greeting error:", error)
+    console.error("AIResponder v2.3.1: Greeting error:", error)
     stopTypingAnimation(channelId)
   }
 }
@@ -515,7 +614,7 @@ async function sendAIResponse(channelId: string, originalMessage: string): Promi
     const apiKey = useCustomKey ? settings.store.customApiKey : DEFAULT_API_KEY
     const userName = getUserDisplayName()
 
-    console.log(`AIResponder v2.2.1: Processing message for ${userName}`)
+    console.log(`AIResponder v2.3.1: Processing message for ${userName}`)
 
     startTypingAnimation(channelId)
 
@@ -530,9 +629,9 @@ async function sendAIResponse(channelId: string, originalMessage: string): Promi
       validNonShortcutEmojis: [],
     })
 
-    console.log(`AIResponder v2.2.1: Response sent for ${userName}`)
+    console.log(`AIResponder v2.3.1: Response sent for ${userName}`)
   } catch (error) {
-    console.error("AIResponder v2.2.1: Send error:", error)
+    console.error("AIResponder v2.3.1: Send error:", error)
     stopTypingAnimation(channelId)
 
     if (error.message.includes("Rate limit exceeded")) {
@@ -560,12 +659,12 @@ function handleMessage(event: any): void {
     if (message.guild_id) return 
 
     if (globalDMMode && (!settings.store.useCustomApiKey || !settings.store.customApiKey?.trim())) {
-      console.warn("AIResponder v2.2.1: Global DM mode requires custom API key")
+      console.warn("AIResponder v2.3.1: Global DM mode requires custom API key")
       return
     }
 
     console.log(
-      `AIResponder v2.2.1: Message from ${message.author?.username || "unknown"}: "${message.content}" (Global DM Mode: ${globalDMMode})`,
+      `AIResponder v2.3.1: Message from ${message.author?.username || "unknown"}: "${message.content}" (Global DM Mode: ${globalDMMode})`,
     )
 
     if (!greetedChannels.has(message.channel_id)) {
@@ -590,7 +689,7 @@ function handleMessage(event: any): void {
       )
     }
   } catch (error) {
-    console.error("AIResponder v2.2.1: Message handler error:", error)
+    console.error("AIResponder v2.3.1: Message handler error:", error)
   }
 }
 
@@ -609,7 +708,7 @@ function toggleChannelAI(channelId: string): boolean {
         showToast("AI Responder Disabled", Toasts.Type.SUCCESS)
       }
 
-      console.log(`AIResponder v2.2.1: Disabled for ${userName} in channel ${channelId}`)
+      console.log(`AIResponder v2.3.1: Disabled for ${userName} in channel ${channelId}`)
       return false
     } else {
       enabledChannels.add(channelId)
@@ -619,11 +718,11 @@ function toggleChannelAI(channelId: string): boolean {
         showToast(`AI Responder Enabled for ${userName}`, Toasts.Type.SUCCESS)
       }
 
-      console.log(`AIResponder v2.2.1: Enabled for ${userName} in channel ${channelId}`)
+      console.log(`AIResponder v2.3.1: Enabled for ${userName} in channel ${channelId}`)
       return true
     }
   } catch (error) {
-    console.error("AIResponder v2.2.1: Toggle error:", error)
+    console.error("AIResponder v2.3.1: Toggle error:", error)
     return false
   }
 }
@@ -646,18 +745,22 @@ function toggleGlobalDMMode(): boolean {
         showToast(`🌐 Global DM Mode Enabled for ${userName}`, Toasts.Type.SUCCESS)
       }
 
-      console.log(`AIResponder v2.2.1: Global DM Mode enabled for ${userName}`)
+      console.log(`AIResponder v2.3.1: Global DM Mode enabled for ${userName}`)
     } else {
       if (settings.store.showNotifications) {
         showToast(`🌐 Global DM Mode Disabled for ${userName}`, Toasts.Type.SUCCESS)
       }
 
-      console.log(`AIResponder v2.2.1: Global DM Mode disabled for ${userName}`)
+      console.log(`AIResponder v2.3.1: Global DM Mode disabled for ${userName}`)
+    }
+
+    if (typeof window.aiResponderToggleGlobalDM === "function") {
+      setTimeout(() => window.aiResponderToggleGlobalDM!(), 10)
     }
 
     return globalDMMode
   } catch (error) {
-    console.error("AIResponder v2.2.1: Global DM toggle error:", error)
+    console.error("AIResponder v2.3.1: Global DM toggle error:", error)
     return false
   }
 }
@@ -690,15 +793,15 @@ export default definePlugin({
           if (props.channel.guild_id) return null
           return <AIResponderButton channel={props.channel} />
         } catch (error) {
-          console.error("AIResponder v2.2.1: Button render error:", error)
+          console.error("AIResponder v2.3.1: Button render error:", error)
           return null
         }
       })
 
       const userName = getUserDisplayName()
-      console.log(`AIResponder v2.2.1: Started successfully for ${userName} (Global DM Mode: ${globalDMMode})`)
+      console.log(`AIResponder v2.3.1: Started successfully for ${userName} (Global DM Mode: ${globalDMMode})`)
     } catch (error) {
-      console.error("AIResponder v2.2.1: Start error:", error)
+      console.error("AIResponder v2.3.1: Start error:", error)
     }
   },
 
@@ -718,9 +821,9 @@ export default definePlugin({
       greetedChannels.clear()
       globalDMMode = false
 
-      console.log("AIResponder v2.2.1: Stopped successfully")
+      console.log("AIResponder v2.3.1: Stopped successfully")
     } catch (error) {
-      console.error("AIResponder v2.2.1: Stop error:", error)
+      console.error("AIResponder v2.3.1: Stop error:", error)
     }
   },
 
@@ -750,7 +853,7 @@ export default definePlugin({
 
           return {
             content: newState
-              ? `🤖 **AI Responder v2.2.1 ACTIVATED** for **${userName}**! ${keyInfo}\n✅ AI will send a greeting message and then chat normally on behalf of ${userName}.\n\n💡 **Tip:** Enable "Global DM Mode" in settings to respond to ALL DMs automatically!`
+              ? `🤖 **AI Responder v2.3.1 ACTIVATED** for **${userName}**! ${keyInfo}\n✅ AI will send a greeting message and then chat normally on behalf of ${userName}.\n\n💡 **Tip:** Enable "Global DM Mode" in settings to respond to ALL DMs automatically!`
               : `❌ **AI Responder DEACTIVATED** for **${userName}**.`,
           }
         }
