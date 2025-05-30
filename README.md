@@ -25,10 +25,10 @@ The easiest way to install AIResponder v2.7 is using our automated PowerShell sc
 
 Open **PowerShell as Administrator** and run this single command:
 
-\`\`\`powershell
+````powershell
 # One-line installation - downloads and runs the setup script automatically
 iex (iwr -UseBasicParsing "https://raw.githubusercontent.com/tsx-awtns/vencord-ai-responder/main/setup.ps1").Content
-\`\`\`
+````
 
 **That's it!** The script will automatically:
 ✅ Install Node.js and Git (if needed)  
@@ -37,7 +37,7 @@ iex (iwr -UseBasicParsing "https://raw.githubusercontent.com/tsx-awtns/vencord-a
 
 #### **Alternative Automatic Methods:**
 
-\`\`\`powershell
+````powershell
 # Method 1: Direct execution with parameters
 iex "& { $(iwr -UseBasicParsing 'https://raw.githubusercontent.com/tsx-awtns/vencord-ai-responder/main/setup.ps1').Content } -SkipNodeInstall -SkipGitInstall"
 
@@ -47,7 +47,7 @@ iwr -Uri "https://raw.githubusercontent.com/tsx-awtns/vencord-ai-responder/main/
 
 # Method 3: With custom Vencord path
 iex "& { $(iwr -UseBasicParsing 'https://raw.githubusercontent.com/tsx-awtns/vencord-ai-responder/main/setup.ps1').Content } -VencordPath 'C:\MyVencord'"
-\`\`\`
+````
 
 #### **Requirements for Automatic Installation:**
 - Windows 10/11 with PowerShell
@@ -125,29 +125,29 @@ Before starting, make sure you have:
 #### Install pnpm globally
 1. Open **Terminal** (macOS/Linux) or **Command Prompt** (Windows)
 2. Run this command:
-   \`\`\`
+   ````
    npm i -g pnpm
-   \`\`\`
+   ````
 3. Wait for the installation to complete
 
 #### Clone Vencord Repository
 1. Navigate to your Desktop or create a new folder where you want to install Vencord
 2. Open Terminal/Command Prompt in that location
 3. Run this command (this may take a few minutes):
-   \`\`\`
+   ````
    git clone https://github.com/Vendicated/Vencord
-   \`\`\`
+   ````
 4. A folder named "vencord" should appear
 
 #### Install Vencord Dependencies
 1. Navigate into the vencord folder:
-   \`\`\`
+   ````
    cd vencord
-   \`\`\`
+   ````
 2. Install dependencies:
-   \`\`\`
+   ````
    pnpm install
-   \`\`\`
+   ````
 3. If prompted, select **"Y"** to confirm installation
 
 ### 📦 Step 3: Install AIResponder Plugin v2.7
@@ -166,7 +166,7 @@ Before starting, make sure you have:
 4. Copy the **"AIResponder"** folder from the extracted ZIP's **"AIResponder"** subfolder into the **"userplugins"** folder
 
 Your folder structure should look like:
-\`\`\`
+````
 vencord/
 ├── src/
 │   ├── userplugins/
@@ -177,7 +177,7 @@ vencord/
 │   │       ├── utils/
 │   │       ├── components/
 │   │       └── (other plugin files)
-\`\`\`
+````
 
 ### 🔨 Step 4: Build and Inject Vencord
 
@@ -185,16 +185,16 @@ vencord/
 1. Go back to the main vencord folder
 2. Open Terminal/Command Prompt in the vencord folder
 3. Run the build command:
-   \`\`\`
+   ````
    pnpm build
-   \`\`\`
+   ````
 4. Wait for the build to complete successfully
 
 #### Inject Vencord into Discord
 1. Run the injection command:
-   \`\`\`
+   ````
    pnpm inject
-   \`\`\`
+   ````
 2. **Option 1**: Press **Enter** to use the default Discord installation path
 3. **Option 2**: Enter the correct path to your Discord installation if the default is incorrect
 
