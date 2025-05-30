@@ -1,11 +1,8 @@
-# 📄 License / Lizenz / Лицензия / الترخيص
+# 📄 License
 
-## 📋 Table of Contents / Inhaltsverzeichnis / Содержание / جدول المحتويات
+## 📋 Table of Contents
 - [English](#english)
-- [Deutsch](#deutsch)
-- [Русский](#русский)
 - [العربية](#العربية)
-
 ---
 
 ## English
