@@ -2,7 +2,6 @@
 
 ## 📋 Table of Contents
 - [English](#english)
-- [العربية](#العربية)
 ---
 
 ## English
