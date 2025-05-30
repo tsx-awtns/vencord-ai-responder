@@ -1,14 +1,15 @@
 /**
- * AIResponder v2.1.0 - Intelligent AI Auto-Responder for Vencord
+ * AIResponder v2.2 - Intelligent AI Auto-Responder for Vencord
  *
  * @author mays_024
  * @id 1210310965162414134
  * @website https://www.syva.uk/syva-dev/
  * @repository https://github.com/tsx-awtns/vencord-ai-responder
- * @version 2.1.0
+ * @version 2.2
  * @license MIT
  *
  * Features:
+ * - Fixed button state management for immediate visual feedback
  * - Enhanced rate limit detection and user notifications
  * - Daily limit handling with account creation guidance
  * - Initial greeting message explaining user is away
@@ -206,13 +207,64 @@ function EnhancedAIIcon({ isActive, isProcessing, size = 24 }: IconProps) {
   )
 }
 
+const AIResponderButton = ({ channel }) => {
+  const [isActive, setIsActive] = React.useState(enabledChannels.has(channel.id))
+  const [isProcessing, setIsProcessing] = React.useState(processingChannels.has(channel.id))
+
+  React.useEffect(() => {
+    const updateState = () => {
+      setIsActive(enabledChannels.has(channel.id))
+      setIsProcessing(processingChannels.has(channel.id))
+    }
+
+    updateState()
+    const interval = setInterval(updateState, 100)
+
+    return () => clearInterval(interval)
+  }, [channel.id])
+
+  const useCustomKey = Boolean(settings.store.useCustomApiKey && settings.store.customApiKey)
+  const keyInfo = useCustomKey ? "Custom Key" : "Default Key (~1k daily limit)"
+  const userName = getUserDisplayName()
+
+  const handleClick = () => {
+    toggleChannelAI(channel.id)
+    setTimeout(() => {
+      setIsActive(enabledChannels.has(channel.id))
+      setIsProcessing(processingChannels.has(channel.id))
+    }, 10)
+  }
+
+  return (
+    <ChatBarButton
+      tooltip={
+        isProcessing
+          ? `🤖 AI is responding for ${userName}...`
+          : isActive
+            ? `✅ AI Responder: ACTIVE for ${userName} (${keyInfo})\nClick to disable`
+            : `❌ AI Responder: INACTIVE for ${userName} (${keyInfo})\nClick to enable`
+      }
+      onClick={handleClick}
+      buttonProps={{
+        style: {
+          padding: "4px",
+          borderRadius: "4px",
+          transition: "all 0.2s ease",
+        },
+      }}
+    >
+      <EnhancedAIIcon isActive={isActive} isProcessing={isProcessing} />
+    </ChatBarButton>
+  )
+}
+
 function getUserDisplayName(): string {
   try {
     const currentUser = UserStore.getCurrentUser()
     if (!currentUser) return "User"
     return currentUser.globalName || currentUser.username || "User"
   } catch (error) {
-    console.error("AIResponder v2.1.0: Error getting user name:", error)
+    console.error("AIResponder v2.2: Error getting user name:", error)
     return "User"
   }
 }
@@ -257,7 +309,7 @@ function handleRateLimitError(useCustomKey: boolean, userName: string): void {
     duration: 10000,
   })
 
-  console.warn(`AIResponder v2.1.0: Rate limit reached for ${userName} (Custom Key: ${useCustomKey})`)
+  console.warn(`AIResponder v2.2: Rate limit reached for ${userName} (Custom Key: ${useCustomKey})`)
 }
 
 async function generateAIResponse(
@@ -286,7 +338,7 @@ You are essentially ${userName}'s AI companion that can hold normal conversation
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "User-Agent": "AIResponder/2.1.0",
+        "User-Agent": "AIResponder/2.2",
       },
       body: JSON.stringify({
         apiKey,
@@ -326,9 +378,9 @@ You are essentially ${userName}'s AI companion that can hold normal conversation
 
     return data.response
   } catch (error) {
-    console.error("AIResponder v2.1.0: API Error:", error)
+    console.error("AIResponder v2.2: API Error:", error)
 
-    if (error instanceof Error && (error.message.includes("rate limit") || error.message.includes("quota") || error.message.includes("429"))) {
+    if (error.message.includes("rate limit") || error.message.includes("quota") || error.message.includes("429")) {
       handleRateLimitError(useCustomKey, userName)
 
       const rateLimitResponses = [
@@ -353,7 +405,7 @@ You are essentially ${userName}'s AI companion that can hold normal conversation
 
 function startTypingAnimation(channelId: string): NodeJS.Timeout | null {
   try {
-    console.log(`AIResponder v2.1.0: Starting typing for channel ${channelId}`)
+    console.log(`AIResponder v2.2: Starting typing for channel ${channelId}`)
 
     const existingInterval = typingIntervals.get(channelId)
     if (existingInterval) {
@@ -366,21 +418,21 @@ function startTypingAnimation(channelId: string): NodeJS.Timeout | null {
       try {
         TypingStore.startTyping(channelId)
       } catch (error) {
-        console.error("AIResponder v2.1.0: Typing interval error:", error)
+        console.error("AIResponder v2.2: Typing interval error:", error)
       }
     }, 8000)
 
     typingIntervals.set(channelId, interval)
     return interval
   } catch (error) {
-    console.error("AIResponder v2.1.0: Start typing error:", error)
+    console.error("AIResponder v2.2: Start typing error:", error)
     return null
   }
 }
 
 function stopTypingAnimation(channelId: string): void {
   try {
-    console.log(`AIResponder v2.1.0: Stopping typing for channel ${channelId}`)
+    console.log(`AIResponder v2.2: Stopping typing for channel ${channelId}`)
 
     const interval = typingIntervals.get(channelId)
     if (interval) {
@@ -390,7 +442,7 @@ function stopTypingAnimation(channelId: string): void {
 
     TypingStore.stopTyping(channelId)
   } catch (error) {
-    console.error("AIResponder v2.1.0: Stop typing error:", error)
+    console.error("AIResponder v2.2: Stop typing error:", error)
   }
 }
 
@@ -402,7 +454,7 @@ async function sendGreetingIfNeeded(channelId: string): Promise<void> {
     const userName = getUserDisplayName()
     const greetingMessage = generateGreetingMessage(userName)
 
-    console.log(`AIResponder v2.1.0: Sending greeting for ${userName} in channel ${channelId}`)
+    console.log(`AIResponder v2.2: Sending greeting for ${userName} in channel ${channelId}`)
 
     startTypingAnimation(channelId)
 
@@ -418,9 +470,9 @@ async function sendGreetingIfNeeded(channelId: string): Promise<void> {
     })
 
     greetedChannels.add(channelId)
-    console.log(`AIResponder v2.1.0: Greeting sent for ${userName}`)
+    console.log(`AIResponder v2.2: Greeting sent for ${userName}`)
   } catch (error) {
-    console.error("AIResponder v2.1.0: Greeting error:", error)
+    console.error("AIResponder v2.2: Greeting error:", error)
     stopTypingAnimation(channelId)
   }
 }
@@ -435,7 +487,7 @@ async function sendAIResponse(channelId: string, originalMessage: string): Promi
     const apiKey = useCustomKey ? settings.store.customApiKey : DEFAULT_API_KEY
     const userName = getUserDisplayName()
 
-    console.log(`AIResponder v2.1.0: Processing message for ${userName}`)
+    console.log(`AIResponder v2.2: Processing message for ${userName}`)
 
     startTypingAnimation(channelId)
 
@@ -450,12 +502,12 @@ async function sendAIResponse(channelId: string, originalMessage: string): Promi
       validNonShortcutEmojis: [],
     })
 
-    console.log(`AIResponder v2.1.0: Response sent for ${userName}`)
+    console.log(`AIResponder v2.2: Response sent for ${userName}`)
   } catch (error) {
-    console.error("AIResponder v2.1.0: Send error:", error)
+    console.error("AIResponder v2.2: Send error:", error)
     stopTypingAnimation(channelId)
 
-    if (error instanceof Error && error.message.includes("Rate limit exceeded")) {
+    if (error.message.includes("Rate limit exceeded")) {
       return
     }
   } finally {
@@ -477,7 +529,7 @@ function handleMessage(event: any): void {
     if (message.author?.bot) return
     if (message.guild_id) return
 
-    console.log(`AIResponder v2.1.0: Message from ${message.author?.username || "unknown"}: "${message.content}"`)
+    console.log(`AIResponder v2.2: Message from ${message.author?.username || "unknown"}: "${message.content}"`)
 
     if (!greetedChannels.has(message.channel_id)) {
       setTimeout(
@@ -501,7 +553,7 @@ function handleMessage(event: any): void {
       )
     }
   } catch (error) {
-    console.error("AIResponder v2.1.0: Message handler error:", error)
+    console.error("AIResponder v2.2: Message handler error:", error)
   }
 }
 
@@ -520,7 +572,7 @@ function toggleChannelAI(channelId: string): boolean {
         showToast("AI Responder Disabled", Toasts.Type.SUCCESS)
       }
 
-      console.log(`AIResponder v2.1.0: Disabled for ${userName} in channel ${channelId}`)
+      console.log(`AIResponder v2.2: Disabled for ${userName} in channel ${channelId}`)
       return false
     } else {
       enabledChannels.add(channelId)
@@ -530,19 +582,17 @@ function toggleChannelAI(channelId: string): boolean {
         showToast(`AI Responder Enabled for ${userName}`, Toasts.Type.SUCCESS)
       }
 
-      console.log(`AIResponder v2.1.0: Enabled for ${userName} in channel ${channelId}`)
+      console.log(`AIResponder v2.2: Enabled for ${userName} in channel ${channelId}`)
       return true
     }
   } catch (error) {
-    console.error("AIResponder v2.1.0: Toggle error:", error)
+    console.error("AIResponder v2.2: Toggle error:", error)
     return false
   }
 }
 
 export default definePlugin({
   name: "AIResponder",
-  version: "2.1.0",
-  tags: ["AI", "Auto-Responder", "OpenRouter", "syva.uk"],
   description:
     "🤖 Intelligent AI auto-responder using OpenRouter.ai with Llama models. Created by mays_024 - Visit: www.syva.uk",
   authors: [
@@ -563,44 +613,17 @@ export default definePlugin({
       addChatBarButton("airesponder", (props) => {
         try {
           if (props.channel.guild_id) return null
-
-          const isActive = enabledChannels.has(props.channel.id)
-          const isProcessing = processingChannels.has(props.channel.id)
-          const useCustomKey = Boolean(settings.store.useCustomApiKey && settings.store.customApiKey)
-          const keyInfo = useCustomKey ? "Custom Key" : "Default Key (~1k daily limit)"
-          const userName = getUserDisplayName()
-
-          return (
-            <ChatBarButton
-              tooltip={
-                isProcessing
-                  ? `🤖 AI is responding for ${userName}...`
-                  : isActive
-                    ? `✅ AI Responder: ACTIVE for ${userName} (${keyInfo})\nClick to disable`
-                    : `❌ AI Responder: INACTIVE for ${userName} (${keyInfo})\nClick to enable`
-              }
-              onClick={() => toggleChannelAI(props.channel.id)}
-              buttonProps={{
-                style: {
-                  padding: "4px",
-                  borderRadius: "4px",
-                  transition: "all 0.2s ease",
-                },
-              }}
-            >
-              <EnhancedAIIcon isActive={isActive} isProcessing={isProcessing} />
-            </ChatBarButton>
-          )
+          return <AIResponderButton channel={props.channel} />
         } catch (error) {
-          console.error("AIResponder v2.1.0: Button render error:", error)
+          console.error("AIResponder v2.2: Button render error:", error)
           return null
         }
       })
 
       const userName = getUserDisplayName()
-      console.log(`AIResponder v2.1.0: Started successfully for ${userName}`)
+      console.log(`AIResponder v2.2: Started successfully for ${userName}`)
     } catch (error) {
-      console.error("AIResponder v2.1.0: Start error:", error)
+      console.error("AIResponder v2.2: Start error:", error)
     }
   },
 
@@ -619,9 +642,9 @@ export default definePlugin({
       typingIntervals.clear()
       greetedChannels.clear()
 
-      console.log("AIResponder v2.1.0: Stopped successfully")
+      console.log("AIResponder v2.2: Stopped successfully")
     } catch (error) {
-      console.error("AIResponder v2.1.0: Stop error:", error)
+      console.error("AIResponder v2.2: Stop error:", error)
     }
   },
 
@@ -642,7 +665,7 @@ export default definePlugin({
 
         return {
           content: newState
-            ? `🤖 **AI Responder v2.1.0 ACTIVATED** for **${userName}**! ${keyInfo}\n✅ AI will send a greeting message and then chat normally on behalf of ${userName}.\n\n💡 **Tip:** Create your own free OpenRouter.ai account for unlimited daily usage!`
+            ? `🤖 **AI Responder v2.2 ACTIVATED** for **${userName}**! ${keyInfo}\n✅ AI will send a greeting message and then chat normally on behalf of ${userName}.\n\n💡 **Tip:** Create your own free OpenRouter.ai account for unlimited daily usage!`
             : `❌ **AI Responder DEACTIVATED** for **${userName}**.`,
         }
       },
