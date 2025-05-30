@@ -1,11 +1,10 @@
 /**
- * AIResponder v2.2 - Intelligent AI Auto-Responder for Vencord
+ * AIResponder v2.2.1 - Intelligent AI Auto-Responder for Vencord
  *
  * @author mays_024
- * @id 1210310965162414134
  * @website https://www.syva.uk/syva-dev/
  * @repository https://github.com/tsx-awtns/vencord-ai-responder
- * @version 2.2
+ * @version 2.2.1
  * @license MIT
  *
  * Features:
@@ -39,6 +38,7 @@ const enabledChannels = new Set<string>()
 const processingChannels = new Set<string>()
 const typingIntervals = new Map<string, NodeJS.Timeout>()
 const greetedChannels = new Set<string>()
+let globalDMMode = false
 
 const DEFAULT_API_KEY = "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"
 
@@ -74,6 +74,12 @@ const settings = definePluginSettings({
     type: OptionType.BOOLEAN,
     description: "Show helpful notifications when daily limits are reached",
     default: true,
+  },
+  enableForAllDMs: {
+    type: OptionType.BOOLEAN,
+    description: "Enable AI responder for ALL DMs automatically (requires custom API key)",
+    default: false,
+    disabled: () => !settings.store.useCustomApiKey || !settings.store.customApiKey?.trim(),
   },
 })
 
@@ -208,12 +214,12 @@ function EnhancedAIIcon({ isActive, isProcessing, size = 24 }: IconProps) {
 }
 
 const AIResponderButton = ({ channel }) => {
-  const [isActive, setIsActive] = React.useState(enabledChannels.has(channel.id))
+  const [isActive, setIsActive] = React.useState(enabledChannels.has(channel.id) || globalDMMode)
   const [isProcessing, setIsProcessing] = React.useState(processingChannels.has(channel.id))
 
   React.useEffect(() => {
     const updateState = () => {
-      setIsActive(enabledChannels.has(channel.id))
+      setIsActive(enabledChannels.has(channel.id) || globalDMMode)
       setIsProcessing(processingChannels.has(channel.id))
     }
 
@@ -228,32 +234,54 @@ const AIResponderButton = ({ channel }) => {
   const userName = getUserDisplayName()
 
   const handleClick = () => {
-    toggleChannelAI(channel.id)
+    if (globalDMMode) {
+      toggleGlobalDMMode()
+    } else {
+      toggleChannelAI(channel.id)
+    }
+
     setTimeout(() => {
-      setIsActive(enabledChannels.has(channel.id))
+      setIsActive(enabledChannels.has(channel.id) || globalDMMode)
       setIsProcessing(processingChannels.has(channel.id))
     }, 10)
   }
 
+  const tooltipText = globalDMMode
+    ? `🌐 AI Responder: GLOBAL DM MODE for ${userName} (${keyInfo})\nResponding to ALL DMs automatically\nClick to disable global mode`
+    : isProcessing
+      ? `🤖 AI is responding for ${userName}...`
+      : isActive
+        ? `✅ AI Responder: ACTIVE\nClick to disable`
+        : `❌ AI Responder: INACTIVE\nClick to enable`
+
   return (
     <ChatBarButton
-      tooltip={
-        isProcessing
-          ? `🤖 AI is responding for ${userName}...`
-          : isActive
-            ? `✅ AI Responder: ACTIVE for ${userName} (${keyInfo})\nClick to disable`
-            : `❌ AI Responder: INACTIVE for ${userName} (${keyInfo})\nClick to enable`
-      }
+      tooltip={tooltipText}
       onClick={handleClick}
       buttonProps={{
         style: {
           padding: "4px",
           borderRadius: "4px",
           transition: "all 0.2s ease",
+          border: globalDMMode ? "2px solid #00ff88" : "none",
         },
       }}
     >
       <EnhancedAIIcon isActive={isActive} isProcessing={isProcessing} />
+      {globalDMMode && (
+        <div
+          style={{
+            position: "absolute",
+            top: "-2px",
+            right: "-2px",
+            width: "8px",
+            height: "8px",
+            borderRadius: "50%",
+            backgroundColor: "#00ff88",
+            border: "1px solid white",
+          }}
+        />
+      )}
     </ChatBarButton>
   )
 }
@@ -264,7 +292,7 @@ function getUserDisplayName(): string {
     if (!currentUser) return "User"
     return currentUser.globalName || currentUser.username || "User"
   } catch (error) {
-    console.error("AIResponder v2.2: Error getting user name:", error)
+    console.error("AIResponder v2.2.1: Error getting user name:", error)
     return "User"
   }
 }
@@ -309,7 +337,7 @@ function handleRateLimitError(useCustomKey: boolean, userName: string): void {
     duration: 10000,
   })
 
-  console.warn(`AIResponder v2.2: Rate limit reached for ${userName} (Custom Key: ${useCustomKey})`)
+  console.warn(`AIResponder v2.2.1: Rate limit reached for ${userName} (Custom Key: ${useCustomKey})`)
 }
 
 async function generateAIResponse(
@@ -338,7 +366,7 @@ You are essentially ${userName}'s AI companion that can hold normal conversation
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "User-Agent": "AIResponder/2.2",
+        "User-Agent": "AIResponder/2.2.1",
       },
       body: JSON.stringify({
         apiKey,
@@ -378,7 +406,7 @@ You are essentially ${userName}'s AI companion that can hold normal conversation
 
     return data.response
   } catch (error) {
-    console.error("AIResponder v2.2: API Error:", error)
+    console.error("AIResponder v2.2.1: API Error:", error)
 
     if (error.message.includes("rate limit") || error.message.includes("quota") || error.message.includes("429")) {
       handleRateLimitError(useCustomKey, userName)
@@ -405,7 +433,7 @@ You are essentially ${userName}'s AI companion that can hold normal conversation
 
 function startTypingAnimation(channelId: string): NodeJS.Timeout | null {
   try {
-    console.log(`AIResponder v2.2: Starting typing for channel ${channelId}`)
+    console.log(`AIResponder v2.2.1: Starting typing for channel ${channelId}`)
 
     const existingInterval = typingIntervals.get(channelId)
     if (existingInterval) {
@@ -418,21 +446,21 @@ function startTypingAnimation(channelId: string): NodeJS.Timeout | null {
       try {
         TypingStore.startTyping(channelId)
       } catch (error) {
-        console.error("AIResponder v2.2: Typing interval error:", error)
+        console.error("AIResponder v2.2.1: Typing interval error:", error)
       }
     }, 8000)
 
     typingIntervals.set(channelId, interval)
     return interval
   } catch (error) {
-    console.error("AIResponder v2.2: Start typing error:", error)
+    console.error("AIResponder v2.2.1: Start typing error:", error)
     return null
   }
 }
 
 function stopTypingAnimation(channelId: string): void {
   try {
-    console.log(`AIResponder v2.2: Stopping typing for channel ${channelId}`)
+    console.log(`AIResponder v2.2.1: Stopping typing for channel ${channelId}`)
 
     const interval = typingIntervals.get(channelId)
     if (interval) {
@@ -442,7 +470,7 @@ function stopTypingAnimation(channelId: string): void {
 
     TypingStore.stopTyping(channelId)
   } catch (error) {
-    console.error("AIResponder v2.2: Stop typing error:", error)
+    console.error("AIResponder v2.2.1: Stop typing error:", error)
   }
 }
 
@@ -454,7 +482,7 @@ async function sendGreetingIfNeeded(channelId: string): Promise<void> {
     const userName = getUserDisplayName()
     const greetingMessage = generateGreetingMessage(userName)
 
-    console.log(`AIResponder v2.2: Sending greeting for ${userName} in channel ${channelId}`)
+    console.log(`AIResponder v2.2.1: Sending greeting for ${userName} in channel ${channelId}`)
 
     startTypingAnimation(channelId)
 
@@ -470,9 +498,9 @@ async function sendGreetingIfNeeded(channelId: string): Promise<void> {
     })
 
     greetedChannels.add(channelId)
-    console.log(`AIResponder v2.2: Greeting sent for ${userName}`)
+    console.log(`AIResponder v2.2.1: Greeting sent for ${userName}`)
   } catch (error) {
-    console.error("AIResponder v2.2: Greeting error:", error)
+    console.error("AIResponder v2.2.1: Greeting error:", error)
     stopTypingAnimation(channelId)
   }
 }
@@ -487,7 +515,7 @@ async function sendAIResponse(channelId: string, originalMessage: string): Promi
     const apiKey = useCustomKey ? settings.store.customApiKey : DEFAULT_API_KEY
     const userName = getUserDisplayName()
 
-    console.log(`AIResponder v2.2: Processing message for ${userName}`)
+    console.log(`AIResponder v2.2.1: Processing message for ${userName}`)
 
     startTypingAnimation(channelId)
 
@@ -502,9 +530,9 @@ async function sendAIResponse(channelId: string, originalMessage: string): Promi
       validNonShortcutEmojis: [],
     })
 
-    console.log(`AIResponder v2.2: Response sent for ${userName}`)
+    console.log(`AIResponder v2.2.1: Response sent for ${userName}`)
   } catch (error) {
-    console.error("AIResponder v2.2: Send error:", error)
+    console.error("AIResponder v2.2.1: Send error:", error)
     stopTypingAnimation(channelId)
 
     if (error.message.includes("Rate limit exceeded")) {
@@ -520,16 +548,25 @@ function handleMessage(event: any): void {
     const message = event.message
     if (!message) return
 
-    if (!enabledChannels.has(message.channel_id)) return
+    const shouldRespond = globalDMMode || enabledChannels.has(message.channel_id)
+    if (!shouldRespond) return
+
     if (processingChannels.has(message.channel_id)) return
 
     const currentUser = UserStore.getCurrentUser()
     if (!currentUser) return
     if (message.author?.id === currentUser.id) return
     if (message.author?.bot) return
-    if (message.guild_id) return
+    if (message.guild_id) return 
 
-    console.log(`AIResponder v2.2: Message from ${message.author?.username || "unknown"}: "${message.content}"`)
+    if (globalDMMode && (!settings.store.useCustomApiKey || !settings.store.customApiKey?.trim())) {
+      console.warn("AIResponder v2.2.1: Global DM mode requires custom API key")
+      return
+    }
+
+    console.log(
+      `AIResponder v2.2.1: Message from ${message.author?.username || "unknown"}: "${message.content}" (Global DM Mode: ${globalDMMode})`,
+    )
 
     if (!greetedChannels.has(message.channel_id)) {
       setTimeout(
@@ -553,7 +590,7 @@ function handleMessage(event: any): void {
       )
     }
   } catch (error) {
-    console.error("AIResponder v2.2: Message handler error:", error)
+    console.error("AIResponder v2.2.1: Message handler error:", error)
   }
 }
 
@@ -572,7 +609,7 @@ function toggleChannelAI(channelId: string): boolean {
         showToast("AI Responder Disabled", Toasts.Type.SUCCESS)
       }
 
-      console.log(`AIResponder v2.2: Disabled for ${userName} in channel ${channelId}`)
+      console.log(`AIResponder v2.2.1: Disabled for ${userName} in channel ${channelId}`)
       return false
     } else {
       enabledChannels.add(channelId)
@@ -582,11 +619,45 @@ function toggleChannelAI(channelId: string): boolean {
         showToast(`AI Responder Enabled for ${userName}`, Toasts.Type.SUCCESS)
       }
 
-      console.log(`AIResponder v2.2: Enabled for ${userName} in channel ${channelId}`)
+      console.log(`AIResponder v2.2.1: Enabled for ${userName} in channel ${channelId}`)
       return true
     }
   } catch (error) {
-    console.error("AIResponder v2.2: Toggle error:", error)
+    console.error("AIResponder v2.2.1: Toggle error:", error)
+    return false
+  }
+}
+
+function toggleGlobalDMMode(): boolean {
+  try {
+    const userName = getUserDisplayName()
+
+    if (!settings.store.useCustomApiKey || !settings.store.customApiKey?.trim()) {
+      showToast("❌ Global DM Mode requires a custom API key!", Toasts.Type.FAILURE)
+      return false
+    }
+
+    globalDMMode = !globalDMMode
+
+    if (globalDMMode) {
+      enabledChannels.clear()
+
+      if (settings.store.showNotifications) {
+        showToast(`🌐 Global DM Mode Enabled for ${userName}`, Toasts.Type.SUCCESS)
+      }
+
+      console.log(`AIResponder v2.2.1: Global DM Mode enabled for ${userName}`)
+    } else {
+      if (settings.store.showNotifications) {
+        showToast(`🌐 Global DM Mode Disabled for ${userName}`, Toasts.Type.SUCCESS)
+      }
+
+      console.log(`AIResponder v2.2.1: Global DM Mode disabled for ${userName}`)
+    }
+
+    return globalDMMode
+  } catch (error) {
+    console.error("AIResponder v2.2.1: Global DM toggle error:", error)
     return false
   }
 }
@@ -610,20 +681,24 @@ export default definePlugin({
     try {
       FluxDispatcher.subscribe("MESSAGE_CREATE", handleMessage)
 
+      globalDMMode = Boolean(
+        settings.store.enableForAllDMs && settings.store.useCustomApiKey && settings.store.customApiKey?.trim(),
+      )
+
       addChatBarButton("airesponder", (props) => {
         try {
           if (props.channel.guild_id) return null
           return <AIResponderButton channel={props.channel} />
         } catch (error) {
-          console.error("AIResponder v2.2: Button render error:", error)
+          console.error("AIResponder v2.2.1: Button render error:", error)
           return null
         }
       })
 
       const userName = getUserDisplayName()
-      console.log(`AIResponder v2.2: Started successfully for ${userName}`)
+      console.log(`AIResponder v2.2.1: Started successfully for ${userName} (Global DM Mode: ${globalDMMode})`)
     } catch (error) {
-      console.error("AIResponder v2.2: Start error:", error)
+      console.error("AIResponder v2.2.1: Start error:", error)
     }
   },
 
@@ -641,32 +716,43 @@ export default definePlugin({
       processingChannels.clear()
       typingIntervals.clear()
       greetedChannels.clear()
+      globalDMMode = false
 
-      console.log("AIResponder v2.2: Stopped successfully")
+      console.log("AIResponder v2.2.1: Stopped successfully")
     } catch (error) {
-      console.error("AIResponder v2.2: Stop error:", error)
+      console.error("AIResponder v2.2.1: Stop error:", error)
     }
   },
 
   commands: [
     {
       name: "airesponder",
-      description: "Toggle AI auto-responder for current channel",
+      description: "Toggle AI auto-responder for current channel or global DM mode",
       execute: () => {
         const currentChannelId = SelectedChannelStore.getChannelId()
         if (!currentChannelId) {
           return { content: "❌ No channel selected" }
         }
 
-        const newState = toggleChannelAI(currentChannelId)
-        const useCustomKey = Boolean(settings.store.useCustomApiKey && settings.store.customApiKey)
-        const keyInfo = useCustomKey ? "(Custom API Key - Unlimited)" : "(Default API Key - ~1k daily limit)"
         const userName = getUserDisplayName()
+        const useCustomKey = Boolean(settings.store.useCustomApiKey && settings.store.customApiKey)
 
-        return {
-          content: newState
-            ? `🤖 **AI Responder v2.2 ACTIVATED** for **${userName}**! ${keyInfo}\n✅ AI will send a greeting message and then chat normally on behalf of ${userName}.\n\n💡 **Tip:** Create your own free OpenRouter.ai account for unlimited daily usage!`
-            : `❌ **AI Responder DEACTIVATED** for **${userName}**.`,
+        if (useCustomKey && settings.store.enableForAllDMs) {
+          const newGlobalState = toggleGlobalDMMode()
+          return {
+            content: newGlobalState
+              ? `🌐 **Global DM Mode ACTIVATED** for **${userName}**!\n✅ AI will respond to ALL DMs automatically.\n\n💡 **Custom API Key Active** - Unlimited daily usage!`
+              : `❌ **Global DM Mode DEACTIVATED** for **${userName}**.`,
+          }
+        } else {
+          const newState = toggleChannelAI(currentChannelId)
+          const keyInfo = useCustomKey ? "(Custom API Key - Unlimited)" : "(Default API Key - ~1k daily limit)"
+
+          return {
+            content: newState
+              ? `🤖 **AI Responder v2.2.1 ACTIVATED** for **${userName}**! ${keyInfo}\n✅ AI will send a greeting message and then chat normally on behalf of ${userName}.\n\n💡 **Tip:** Enable "Global DM Mode" in settings to respond to ALL DMs automatically!`
+              : `❌ **AI Responder DEACTIVATED** for **${userName}**.`,
+          }
         }
       },
     },
