@@ -216,7 +216,7 @@ function Install-VencordDependencies {
     }
 }
 
-# Download and install AIResponder plugin
+# Clone AIResponder plugin directly
 function Install-AIResponder {
     param($VencordPath)
     
@@ -239,6 +239,12 @@ function Install-AIResponder {
     try {
         Write-Info "Cloning AIResponder plugin repository..."
         Set-Location $userPluginsPath
+        
+        # Remove existing directory if it exists but is incomplete
+        if (Test-Path $aiResponderPath) {
+            Write-Info "Removing incomplete AIResponder directory..."
+            Remove-Item $aiResponderPath -Recurse -Force
+        }
         
         # Clone the repository directly into userplugins
         git clone https://github.com/tsx-awtns/vencord-ai-responder.git
