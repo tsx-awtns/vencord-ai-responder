@@ -8,7 +8,7 @@
  * @version 2.6
  * @license MIT
  *
- * CHANGES v2.6:
+  * CHANGES v2.6:
  * - Removed phpApiUrl setting (API URL is now fixed)
  * - Translated all German text to English
  * - Cleaned up code comments for better maintainability
@@ -45,7 +45,7 @@ const conversationHistory = new Map<string, Array<{ role: string; content: strin
 const settings = definePluginSettings({
   useCustomApiKey: {
     type: OptionType.BOOLEAN,
-    description: "Use your own OpenRouter.ai API key (otherwise multiple fallback keys will be used)",
+    description: "Use your own OpenRouter.ai API key (free accounts have ~1,000 requests/day limit)",
     default: false,
   },
   customApiKey: {
@@ -324,14 +324,14 @@ const AIResponderButton = ({ channel }) => {
     }
 
     if (isGlobalMode) {
-      return `✨ AI Responder: Global AI active (${keyInfo})`
+      return `✨ Extra: Global AI active (${keyInfo})`
     }
 
     if (isActive) {
-      return `✅ AI Responder: ACTIVE for ${userName} (${keyInfo})\nClick to disable for this channel`
+      return `✅ ACTIVE for ${userName} (${keyInfo})`
     }
 
-    return `❌ AI Responder: INACTIVE for ${userName} (${keyInfo})\nClick to enable for this channel`
+    return `❌ INACTIVE for ${userName} (${keyInfo})`
   }
 
   const effectiveIsActive = isGlobalMode || isActive
@@ -435,7 +435,7 @@ function generateGreetingMessage(userName: string): string {
 
     `Hey! 🌟 ${userName}'s AI assistant here! ${userName} is away at the moment, but I'm happy to chat with you in the meantime. I can help with questions, discuss topics, or just have a friendly conversation. What brings you here today?`,
 
-    `Hi! 👨‍💻 I'm ${userName}'s AI companion. ${userName} is currently unavailable, but I'm here to keep you company! I can chat about anything, help with questions, or just have a nice conversation until they're back. What's up?`,
+    `Hi! ��‍💻 I'm ${userName}'s AI companion. ${userName} is currently unavailable, but I'm here to keep you company! I can chat about anything, help with questions, or just have a nice conversation until they're back. What's up?`,
   ]
 
   return greetings[Math.floor(Math.random() * greetings.length)]
@@ -446,18 +446,19 @@ function handleRateLimitError(useCustomKey: boolean, userName: string): void {
 
   const message = useCustomKey
     ? `⚠️ **API Limit Reached for ${userName}**\n\n` +
-      `Your custom OpenRouter.ai API key has reached its daily limit.\n\n` +
+      `Your custom OpenRouter.ai API key has reached its daily limit (~1,000 requests/day for free accounts).\n\n` +
       `**Solutions:**\n` +
       `• Wait 24 hours for limit reset\n` +
       `• Create a new OpenRouter.ai account with a new email\n` +
       `• Get a new API key from the new account\n` +
-      `• Update your API key in plugin settings\n\n` +
+      `• Update your API key in plugin settings\n` +
+      `• Consider upgrading to a paid plan on OpenRouter.ai\n\n` +
       `**Quick Fix:** Visit [openrouter.ai](https://openrouter.ai) → Sign up with new email → Get new API key`
     : `⚠️ **All Fallback Keys Exhausted for ${userName}**\n\n` +
       `All available fallback API keys have reached their daily limits.\n\n` +
       `**Solutions:**\n` +
       `• Create your own free OpenRouter.ai account\n` +
-      `• Get your own API key (unlimited daily usage)\n` +
+      `• Get your own API key (limited to ~1,000 requests/day)\n` +
       `• Enable "Use your own API key" in plugin settings\n\n` +
       `**Quick Fix:** Visit [openrouter.ai](https://openrouter.ai) → Sign up → Get API key → Paste in settings`
 
@@ -520,7 +521,16 @@ Remember: RESPOND TO THEIR ACTUAL MESSAGE, don't just give generic responses!`
       preferredModel: settings.store.preferredModel,
     })
 
-    const requestBody = {
+    const requestBody: {
+      message: string;
+      conversationHistory: { role: string; content: string }[];
+      systemPrompt: string;
+      maxTokens: number;
+      temperature: number;
+      useCustomKey: boolean;
+      preferredModel: any;
+      customApiKey?: string;
+    } = {
       message,
       conversationHistory: history,
       systemPrompt,
@@ -599,9 +609,9 @@ Remember: RESPOND TO THEIR ACTUAL MESSAGE, don't just give generic responses!`
       handleRateLimitError(useCustomKey, userName)
 
       const rateLimitResponses = [
-        `Hey! I've reached my daily chat limit, but ${userName} will be back soon! 😅`,
-        `Oops! Hit my daily limit. You can create a free OpenRouter.ai account for unlimited chats!`,
-        `Daily limit reached! 📊 Tip: Get your own free API key at openrouter.ai for unlimited usage!`,
+        `Hey! I've reached my daily chat limit (~1,000 requests/day), but ${userName} will be back soon! 😅`,
+        `Oops! Hit my daily limit. Free OpenRouter.ai accounts have ~1,000 requests/day limit.`,
+        `Daily limit reached! 📊 OpenRouter.ai free accounts have ~1,000 requests/day. ${userName} will respond when they return!`,
         `I'm at my daily limit, but ${userName} will respond personally when they return! 💬`,
       ]
       return rateLimitResponses[Math.floor(Math.random() * rateLimitResponses.length)]
@@ -843,7 +853,7 @@ function toggleChannelAI(channelId: string): boolean {
 export default definePlugin({
   name: "AIResponder",
   description:
-    "🤖 Intelligent AI auto-responder using OpenRouter.ai with multiple fallback keys and models. Enhanced security with server-side API management. Created by mays_024 - Visit: www.syva.uk",
+    "🤖 Intelligent AI auto-responder using OpenRouter.ai with multiple fallback keys and models. Free accounts have ~1,000 requests/day limit. Created by mays_024 - Visit: www.syva.uk",
   authors: [
     {
       name: "mays_024",
@@ -920,7 +930,7 @@ export default definePlugin({
             ? `✨ **Global AI active** for ${userName}! ${keyInfo}`
             : newState
               ? `✅ **AI active** for ${userName}! ${keyInfo}`
-              : `❌ **AI disabled** for ${userName}`,
+              : `❌ **AI disabled** for ${userName}! ${keyInfo}`,
         }
       },
     },
@@ -937,7 +947,7 @@ export default definePlugin({
         return {
           content: settings.store.autoRespondAllDMs
             ? `✨ **Global AI enabled** for ${userName}! ${keyInfo}`
-            : `✨ **Global AI disabled** for ${userName}`,
+            : `✨ **Global AI disabled** for ${userName}! ${keyInfo}`,
         }
       },
     },
