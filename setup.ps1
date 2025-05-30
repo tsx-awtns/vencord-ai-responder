@@ -35,15 +35,37 @@ EXAMPLES:
 if ($Help) { Show-Help; exit 0 }
 
 function Test-Administrator {
-    $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
-    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    try {
+        $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
+        $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
+        return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    }
+    catch {
+        return $false
+    }
 }
 
 function Test-Command {
     param($Command)
     try { Get-Command $Command -ErrorAction Stop | Out-Null; return $true }
     catch { return $false }
+}
+
+function Test-ValidPath {
+    param($Path)
+    try {
+        if ([string]::IsNullOrWhiteSpace($Path)) { return $false }
+        $Path = $Path.Trim('"').Trim("'").Trim()
+        if ($Path.Length -eq 0) { return $false }
+        $invalidChars = [System.IO.Path]::GetInvalidPathChars()
+        foreach ($char in $invalidChars) {
+            if ($Path.Contains($char)) { return $false }
+        }
+        return $true
+    }
+    catch {
+        return $false
+    }
 }
 
 function Install-NodeJS {
@@ -75,6 +97,7 @@ function Install-NodeJS {
     catch {
         Write-Error "Failed to install Node.js: $($_.Exception.Message)"
         Write-Info "Install manually from https://nodejs.org/"
+        Read-Host "Press Enter to exit"
         exit 1
     }
 }
@@ -108,6 +131,7 @@ function Install-Git {
     catch {
         Write-Error "Failed to install Git: $($_.Exception.Message)"
         Write-Info "Install manually from https://git-scm.com/"
+        Read-Host "Press Enter to exit"
         exit 1
     }
 }
@@ -127,7 +151,42 @@ function Install-Pnpm {
     }
     catch {
         Write-Error "Failed to install pnpm: $($_.Exception.Message)"
+        Read-Host "Press Enter to exit"
         exit 1
+    }
+}
+
+function Get-VencordPath {
+    $defaultPath = Join-Path $env:USERPROFILE "Desktop\Vencord"
+    
+    while ($true) {
+        try {
+            Write-Info "Enter Vencord installation path:"
+            Write-Info "Default: $defaultPath"
+            Write-Info "Press ENTER for default, or type custom path:"
+            
+            $userInput = Read-Host "Path"
+            
+            if ([string]::IsNullOrWhiteSpace($userInput)) {
+                Write-Info "Using default path: $defaultPath"
+                return $defaultPath
+            }
+            
+            $userInput = $userInput.Trim('"').Trim("'").Trim()
+            
+            if (Test-ValidPath $userInput) {
+                Write-Info "Using custom path: $userInput"
+                return $userInput
+            } else {
+                Write-Warning "Invalid path format. Please try again."
+                Write-Info "Example: C:\MyFolder\Vencord"
+                continue
+            }
+        }
+        catch {
+            Write-Warning "Error reading path. Using default: $defaultPath"
+            return $defaultPath
+        }
     }
 }
 
@@ -136,31 +195,34 @@ function Install-Vencord {
     
     Write-Step "Setting up Vencord"
     
-    if (Test-Path "$InstallPath\package.json") {
-        Write-Success "Vencord already exists at: $InstallPath"
-        return $InstallPath
-    }
-    
-    $parentDir = Split-Path $InstallPath -Parent
-    if (!(Test-Path $parentDir)) {
-        New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
-    }
-    
     try {
+        if (Test-Path "$InstallPath\package.json") {
+            Write-Success "Vencord already exists at: $InstallPath"
+            return $InstallPath
+        }
+        
+        $parentDir = Split-Path $InstallPath -Parent
+        if (!(Test-Path $parentDir)) {
+            Write-Info "Creating directory: $parentDir"
+            New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+        }
+        
         Write-Info "Cloning Vencord repository..."
+        $currentLocation = Get-Location
         Set-Location $parentDir
         git clone https://github.com/Vendicated/Vencord.git (Split-Path $InstallPath -Leaf)
+        Set-Location $currentLocation
         
         if (Test-Path "$InstallPath\package.json") {
             Write-Success "Vencord cloned successfully!"
+            return $InstallPath
         } else {
             throw "Vencord clone verification failed"
         }
-        
-        return $InstallPath
     }
     catch {
         Write-Error "Failed to clone Vencord: $($_.Exception.Message)"
+        Read-Host "Press Enter to exit"
         exit 1
     }
 }
@@ -171,13 +233,16 @@ function Install-VencordDependencies {
     Write-Step "Installing Vencord dependencies"
     
     try {
+        $currentLocation = Get-Location
         Set-Location $VencordPath
         Write-Info "Installing dependencies with pnpm..."
         pnpm install
+        Set-Location $currentLocation
         Write-Success "Vencord dependencies installed successfully!"
     }
     catch {
         Write-Error "Failed to install Vencord dependencies: $($_.Exception.Message)"
+        Read-Host "Press Enter to exit"
         exit 1
     }
 }
@@ -187,21 +252,22 @@ function Install-AIResponder {
     
     Write-Step "Installing AIResponder Plugin"
     
-    $userPluginsPath = Join-Path $VencordPath "src\userplugins"
-    $aiResponderPath = Join-Path $userPluginsPath "AIResponder"
-    
-    if (Test-Path "$aiResponderPath\index.tsx") {
-        Write-Success "AIResponder plugin already exists!"
-        return
-    }
-    
-    if (!(Test-Path $userPluginsPath)) {
-        New-Item -ItemType Directory -Path $userPluginsPath -Force | Out-Null
-        Write-Info "Created userplugins directory"
-    }
-    
     try {
+        $userPluginsPath = Join-Path $VencordPath "src\userplugins"
+        $aiResponderPath = Join-Path $userPluginsPath "AIResponder"
+        
+        if (Test-Path "$aiResponderPath\index.tsx") {
+            Write-Success "AIResponder plugin already exists!"
+            return
+        }
+        
+        if (!(Test-Path $userPluginsPath)) {
+            New-Item -ItemType Directory -Path $userPluginsPath -Force | Out-Null
+            Write-Info "Created userplugins directory"
+        }
+        
         Write-Info "Cloning AIResponder plugin repository..."
+        $currentLocation = Get-Location
         Set-Location $userPluginsPath
         
         if (Test-Path $aiResponderPath) {
@@ -210,6 +276,7 @@ function Install-AIResponder {
         }
         
         git clone https://github.com/tsx-awtns/vencord-ai-responder.git AIResponder
+        Set-Location $currentLocation
         
         if (Test-Path "$aiResponderPath\index.tsx") {
             Write-Success "AIResponder plugin cloned successfully!"
@@ -220,6 +287,7 @@ function Install-AIResponder {
     catch {
         Write-Error "Failed to clone AIResponder plugin: $($_.Exception.Message)"
         Write-Info "Manual clone: https://github.com/tsx-awtns/vencord-ai-responder.git"
+        Read-Host "Press Enter to exit"
         exit 1
     }
 }
@@ -230,13 +298,16 @@ function Build-Vencord {
     Write-Step "Building Vencord"
     
     try {
+        $currentLocation = Get-Location
         Set-Location $VencordPath
         Write-Info "Building Vencord with AIResponder plugin..."
         pnpm build
+        Set-Location $currentLocation
         Write-Success "Vencord built successfully!"
     }
     catch {
         Write-Error "Failed to build Vencord: $($_.Exception.Message)"
+        Read-Host "Press Enter to exit"
         exit 1
     }
 }
@@ -247,10 +318,12 @@ function Inject-Vencord {
     Write-Step "Injecting Vencord into Discord"
     
     try {
+        $currentLocation = Get-Location
         Set-Location $VencordPath
         Write-Info "Injecting Vencord into Discord..."
         Write-Warning "Press ENTER for default Discord path, or enter custom path."
         pnpm inject
+        Set-Location $currentLocation
         Write-Success "Vencord injection completed!"
     }
     catch {
@@ -268,35 +341,38 @@ function Main {
 ╚══════════════════════════════════════════════════════════════╝
 "@ -ForegroundColor Cyan
 
-    if (!(Test-Administrator)) {
-        Write-Warning "Not running as Administrator. Some installations might fail."
-        $continue = Read-Host "Continue anyway? (y/N)"
-        if ($continue -ne "y" -and $continue -ne "Y") { exit 0 }
-    }
+    try {
+        if (!(Test-Administrator)) {
+            Write-Warning "Not running as Administrator. Some installations might fail."
+            $continue = Read-Host "Continue anyway? (y/N)"
+            if ($continue -ne "y" -and $continue -ne "Y") { 
+                Write-Info "Exiting..."
+                Read-Host "Press Enter to exit"
+                exit 0 
+            }
+        }
 
-    if (!$SkipNodeInstall) { Install-NodeJS }
-    if (!$SkipGitInstall) { Install-Git }
-    Install-Pnpm
-    
-    if ([string]::IsNullOrEmpty($VencordPath)) {
-        $defaultPath = Join-Path $env:USERPROFILE "Desktop\Vencord"
-        $VencordPath = Read-Host "Vencord installation path (default: $defaultPath)"
-        if ([string]::IsNullOrEmpty($VencordPath)) { $VencordPath = $defaultPath }
-    }
-    
-    $vencordDir = Install-Vencord -InstallPath $VencordPath
-    Install-VencordDependencies -VencordPath $vencordDir
-    Install-AIResponder -VencordPath $vencordDir
-    Build-Vencord -VencordPath $vencordDir
-    
-    Write-Info "`nVencord and AIResponder are ready!"
-    $inject = Read-Host "Inject Vencord into Discord now? (Y/n)"
-    if ($inject -ne "n" -and $inject -ne "N") {
-        Inject-Vencord -VencordPath $vencordDir
-    }
-    
-    Write-Step "Setup Complete!"
-    Write-Success @"
+        if (!$SkipNodeInstall) { Install-NodeJS }
+        if (!$SkipGitInstall) { Install-Git }
+        Install-Pnpm
+        
+        if ([string]::IsNullOrEmpty($VencordPath)) {
+            $VencordPath = Get-VencordPath
+        }
+        
+        $vencordDir = Install-Vencord -InstallPath $VencordPath
+        Install-VencordDependencies -VencordPath $vencordDir
+        Install-AIResponder -VencordPath $vencordDir
+        Build-Vencord -VencordPath $vencordDir
+        
+        Write-Info "`nVencord and AIResponder are ready!"
+        $inject = Read-Host "Inject Vencord into Discord now? (Y/n)"
+        if ($inject -ne "n" -and $inject -ne "N") {
+            Inject-Vencord -VencordPath $vencordDir
+        }
+        
+        Write-Step "Setup Complete!"
+        Write-Success @"
 ✅ AIResponder plugin installed successfully!
 
 NEXT STEPS:
@@ -312,9 +388,19 @@ OPTIONAL API KEY:
 SUPPORT: https://discord.gg/aBvYsY2GnQ
 "@
 
-    Write-Info "`nInstallation: $vencordDir"
-    if ($inject -eq "n" -or $inject -eq "N") {
-        Write-Warning "Run 'pnpm inject' in Vencord directory to inject into Discord!"
+        Write-Info "`nInstallation: $vencordDir"
+        if ($inject -eq "n" -or $inject -eq "N") {
+            Write-Warning "Run 'pnpm inject' in Vencord directory to inject into Discord!"
+        }
+        
+        Write-Info "`nSetup completed successfully!"
+        Read-Host "Press Enter to exit"
+    }
+    catch {
+        Write-Error "Setup failed: $($_.Exception.Message)"
+        Write-Info "Try manual installation or check README.md"
+        Read-Host "Press Enter to exit"
+        exit 1
     }
 }
 
@@ -322,10 +408,17 @@ try {
     Main
 }
 catch {
-    Write-Error "Setup failed: $($_.Exception.Message)"
-    Write-Info "Try manual installation or check README.md"
+    Write-Error "Critical error: $($_.Exception.Message)"
+    Read-Host "Press Enter to exit"
     exit 1
 }
 finally {
-    if ($PWD.Path -ne $PSScriptRoot) { Set-Location $PSScriptRoot }
+    try {
+        if ($PWD.Path -ne $PSScriptRoot -and $PSScriptRoot) { 
+            Set-Location $PSScriptRoot 
+        }
+    }
+    catch {
+        # Ignore location reset errors
+    }
 }
