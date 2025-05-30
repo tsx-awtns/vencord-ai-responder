@@ -1,8 +1,3 @@
-# AIResponder Plugin Automated Setup Script
-# Version: 2.6
-# Author: mays_024
-# Website: https://www.syva.uk/syva-dev/
-
 param(
     [switch]$SkipNodeInstall,
     [switch]$SkipGitInstall,
@@ -10,145 +5,118 @@ param(
     [switch]$Help
 )
 
-# Color functions for better output
 function Write-Success { param($Message) Write-Host $Message -ForegroundColor Green }
 function Write-Warning { param($Message) Write-Host $Message -ForegroundColor Yellow }
 function Write-Error { param($Message) Write-Host $Message -ForegroundColor Red }
 function Write-Info { param($Message) Write-Host $Message -ForegroundColor Cyan }
 function Write-Step { param($Message) Write-Host "`n=== $Message ===" -ForegroundColor Magenta }
 
-# Help function
 function Show-Help {
     Write-Host @"
-AIResponder Plugin Automated Setup Script
+AIResponder Plugin Automated Setup Script v2.6
 
 USAGE:
     .\setup.ps1 [OPTIONS]
 
 OPTIONS:
-    -SkipNodeInstall    Skip Node.js installation check
-    -SkipGitInstall     Skip Git installation check  
-    -VencordPath        Specify custom Vencord installation path
-    -Help               Show this help message
+    -SkipNodeInstall    Skip Node.js installation
+    -SkipGitInstall     Skip Git installation  
+    -VencordPath        Custom Vencord installation path
+    -Help               Show this help
 
 EXAMPLES:
-    .\setup.ps1                                    # Full automated setup
-    .\setup.ps1 -SkipNodeInstall -SkipGitInstall   # Skip dependency checks
-    .\setup.ps1 -VencordPath "C:\MyVencord"        # Use custom Vencord path
-
-REQUIREMENTS:
-    - Windows PowerShell 5.1 or PowerShell Core 7+
-    - Internet connection
-    - Administrator privileges (recommended)
+    .\setup.ps1
+    .\setup.ps1 -SkipNodeInstall -SkipGitInstall
+    .\setup.ps1 -VencordPath "C:\MyVencord"
 
 "@ -ForegroundColor White
 }
 
-if ($Help) {
-    Show-Help
-    exit 0
-}
+if ($Help) { Show-Help; exit 0 }
 
-# Check if running as administrator
 function Test-Administrator {
     $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
     return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-# Check if command exists
 function Test-Command {
     param($Command)
-    try {
-        Get-Command $Command -ErrorAction Stop | Out-Null
-        return $true
-    }
-    catch {
-        return $false
-    }
+    try { Get-Command $Command -ErrorAction Stop | Out-Null; return $true }
+    catch { return $false }
 }
 
-# Download and install Node.js
 function Install-NodeJS {
     Write-Step "Installing Node.js"
     
     if (Test-Command "node") {
-        $nodeVersion = node --version
-        Write-Success "Node.js is already installed: $nodeVersion"
+        Write-Success "Node.js already installed: $(node --version)"
         return
     }
     
-    Write-Info "Downloading Node.js LTS..."
     $nodeUrl = "https://nodejs.org/dist/v20.10.0/node-v20.10.0-x64.msi"
     $nodeInstaller = "$env:TEMP\nodejs-installer.msi"
     
     try {
+        Write-Info "Downloading and installing Node.js..."
         Invoke-WebRequest -Uri $nodeUrl -OutFile $nodeInstaller -UseBasicParsing
-        Write-Info "Installing Node.js..."
         Start-Process -FilePath "msiexec.exe" -ArgumentList "/i", $nodeInstaller, "/quiet", "/norestart" -Wait
         
-        # Refresh environment variables
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
         
         if (Test-Command "node") {
             Write-Success "Node.js installed successfully!"
         } else {
-            Write-Warning "Node.js installation completed, but 'node' command not found. You may need to restart your terminal."
+            Write-Warning "Node.js installed but command not found. Restart terminal if needed."
         }
         
         Remove-Item $nodeInstaller -Force -ErrorAction SilentlyContinue
     }
     catch {
         Write-Error "Failed to install Node.js: $($_.Exception.Message)"
-        Write-Info "Please install Node.js manually from https://nodejs.org/"
+        Write-Info "Install manually from https://nodejs.org/"
         exit 1
     }
 }
 
-# Download and install Git
 function Install-Git {
     Write-Step "Installing Git"
     
     if (Test-Command "git") {
-        $gitVersion = git --version
-        Write-Success "Git is already installed: $gitVersion"
+        Write-Success "Git already installed: $(git --version)"
         return
     }
     
-    Write-Info "Downloading Git..."
     $gitUrl = "https://github.com/git-for-windows/git/releases/download/v2.42.0.windows.2/Git-2.42.0.2-64-bit.exe"
     $gitInstaller = "$env:TEMP\git-installer.exe"
     
     try {
+        Write-Info "Downloading and installing Git..."
         Invoke-WebRequest -Uri $gitUrl -OutFile $gitInstaller -UseBasicParsing
-        Write-Info "Installing Git..."
         Start-Process -FilePath $gitInstaller -ArgumentList "/VERYSILENT", "/NORESTART" -Wait
         
-        # Refresh environment variables
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
         
         if (Test-Command "git") {
             Write-Success "Git installed successfully!"
         } else {
-            Write-Warning "Git installation completed, but 'git' command not found. You may need to restart your terminal."
+            Write-Warning "Git installed but command not found. Restart terminal if needed."
         }
         
         Remove-Item $gitInstaller -Force -ErrorAction SilentlyContinue
     }
     catch {
         Write-Error "Failed to install Git: $($_.Exception.Message)"
-        Write-Info "Please install Git manually from https://git-scm.com/"
+        Write-Info "Install manually from https://git-scm.com/"
         exit 1
     }
 }
 
-# Install pnpm globally
 function Install-Pnpm {
     Write-Step "Installing pnpm"
     
     if (Test-Command "pnpm") {
-        $pnpmVersion = pnpm --version
-        Write-Success "pnpm is already installed: $pnpmVersion"
+        Write-Success "pnpm already installed: $(pnpm --version)"
         return
     }
     
@@ -163,7 +131,6 @@ function Install-Pnpm {
     }
 }
 
-# Clone Vencord repository
 function Install-Vencord {
     param($InstallPath)
     
@@ -198,7 +165,6 @@ function Install-Vencord {
     }
 }
 
-# Install Vencord dependencies
 function Install-VencordDependencies {
     param($VencordPath)
     
@@ -206,63 +172,58 @@ function Install-VencordDependencies {
     
     try {
         Set-Location $VencordPath
-        Write-Info "Installing dependencies with pnpm..."
+        Write-Info "Installing dependencies..."
         pnpm install
-        Write-Success "Vencord dependencies installed successfully!"
+        Write-Success "Dependencies installed successfully!"
     }
     catch {
-        Write-Error "Failed to install Vencord dependencies: $($_.Exception.Message)"
+        Write-Error "Failed to install dependencies: $($_.Exception.Message)"
         exit 1
     }
 }
 
-# Clone AIResponder plugin directly
 function Install-AIResponder {
     param($VencordPath)
     
     Write-Step "Installing AIResponder Plugin"
     
     $userPluginsPath = Join-Path $VencordPath "src\userplugins"
-    $aiResponderPath = Join-Path $userPluginsPath "vencord-ai-responder"
+    $aiResponderPath = Join-Path $userPluginsPath "AIResponder"
     
     if (Test-Path "$aiResponderPath\index.tsx") {
         Write-Success "AIResponder plugin already exists!"
         return
     }
     
-    # Create userplugins directory if it doesn't exist
     if (!(Test-Path $userPluginsPath)) {
         New-Item -ItemType Directory -Path $userPluginsPath -Force | Out-Null
         Write-Info "Created userplugins directory"
     }
     
     try {
-        Write-Info "Cloning AIResponder plugin repository..."
+        Write-Info "Cloning AIResponder plugin..."
         Set-Location $userPluginsPath
         
-        # Remove existing directory if it exists but is incomplete
         if (Test-Path $aiResponderPath) {
-            Write-Info "Removing incomplete AIResponder directory..."
+            Write-Info "Removing existing AIResponder directory..."
             Remove-Item $aiResponderPath -Recurse -Force
         }
         
-        # Clone the repository directly into userplugins
-        git clone https://github.com/tsx-awtns/vencord-ai-responder.git
+        git clone https://github.com/tsx-awtns/vencord-ai-responder.git AIResponder
         
         if (Test-Path "$aiResponderPath\index.tsx") {
-            Write-Success "AIResponder plugin cloned successfully!"
+            Write-Success "AIResponder plugin installed successfully!"
         } else {
-            throw "AIResponder plugin files not found after cloning"
+            throw "Plugin files not found after cloning"
         }
     }
     catch {
-        Write-Error "Failed to clone AIResponder plugin: $($_.Exception.Message)"
-        Write-Info "You can manually clone from: https://github.com/tsx-awtns/vencord-ai-responder.git"
+        Write-Error "Failed to install AIResponder: $($_.Exception.Message)"
+        Write-Info "Manual clone: https://github.com/tsx-awtns/vencord-ai-responder.git"
         exit 1
     }
 }
 
-# Build Vencord
 function Build-Vencord {
     param($VencordPath)
     
@@ -270,17 +231,16 @@ function Build-Vencord {
     
     try {
         Set-Location $VencordPath
-        Write-Info "Building Vencord with AIResponder plugin..."
+        Write-Info "Building Vencord with AIResponder..."
         pnpm build
-        Write-Success "Vencord built successfully!"
+        Write-Success "Build completed successfully!"
     }
     catch {
-        Write-Error "Failed to build Vencord: $($_.Exception.Message)"
+        Write-Error "Build failed: $($_.Exception.Message)"
         exit 1
     }
 }
 
-# Inject Vencord into Discord
 function Inject-Vencord {
     param($VencordPath)
     
@@ -288,114 +248,78 @@ function Inject-Vencord {
     
     try {
         Set-Location $VencordPath
-        Write-Info "Injecting Vencord into Discord..."
-        Write-Warning "If prompted, press ENTER to use the default Discord path, or enter your custom Discord path."
+        Write-Info "Injecting Vencord..."
+        Write-Warning "Press ENTER for default Discord path or enter custom path when prompted"
         pnpm inject
-        Write-Success "Vencord injection completed!"
+        Write-Success "Injection completed!"
     }
     catch {
-        Write-Error "Failed to inject Vencord: $($_.Exception.Message)"
-        Write-Info "You can manually run 'pnpm inject' in the Vencord directory later."
+        Write-Error "Injection failed: $($_.Exception.Message)"
+        Write-Info "Run 'pnpm inject' manually in Vencord directory"
     }
 }
 
-# Main execution
 function Main {
     Write-Host @"
 ╔══════════════════════════════════════════════════════════════╗
-║                   AIResponder Setup Script                  ║
-║                        Version 2.6                          ║
+║                   AIResponder Setup v2.6                    ║
 ║                     by mays_024                              ║
 ╚══════════════════════════════════════════════════════════════╝
 "@ -ForegroundColor Cyan
 
-    # Check administrator privileges
     if (!(Test-Administrator)) {
-        Write-Warning "Running without administrator privileges. Some installations might fail."
-        Write-Info "Consider running PowerShell as Administrator for best results."
-        $continue = Read-Host "Continue anyway? (y/N)"
-        if ($continue -ne "y" -and $continue -ne "Y") {
-            exit 0
-        }
+        Write-Warning "Not running as Administrator. Some installations might fail."
+        $continue = Read-Host "Continue? (y/N)"
+        if ($continue -ne "y" -and $continue -ne "Y") { exit 0 }
     }
 
-    # Install dependencies
-    if (!$SkipNodeInstall) {
-        Install-NodeJS
-    }
-    
-    if (!$SkipGitInstall) {
-        Install-Git
-    }
-    
+    if (!$SkipNodeInstall) { Install-NodeJS }
+    if (!$SkipGitInstall) { Install-Git }
     Install-Pnpm
     
-    # Determine Vencord installation path
     if ([string]::IsNullOrEmpty($VencordPath)) {
         $defaultPath = Join-Path $env:USERPROFILE "Desktop\Vencord"
-        $VencordPath = Read-Host "Enter Vencord installation path (default: $defaultPath)"
-        if ([string]::IsNullOrEmpty($VencordPath)) {
-            $VencordPath = $defaultPath
-        }
+        $VencordPath = Read-Host "Vencord path (default: $defaultPath)"
+        if ([string]::IsNullOrEmpty($VencordPath)) { $VencordPath = $defaultPath }
     }
     
-    # Setup Vencord and AIResponder
     $vencordDir = Install-Vencord -InstallPath $VencordPath
     Install-VencordDependencies -VencordPath $vencordDir
     Install-AIResponder -VencordPath $vencordDir
     Build-Vencord -VencordPath $vencordDir
     
-    # Ask about injection
-    Write-Info "`nVencord and AIResponder are now ready!"
-    $inject = Read-Host "Do you want to inject Vencord into Discord now? (Y/n)"
+    Write-Info "`nSetup complete! Ready for injection."
+    $inject = Read-Host "Inject Vencord into Discord now? (Y/n)"
     if ($inject -ne "n" -and $inject -ne "N") {
         Inject-Vencord -VencordPath $vencordDir
     }
     
-    # Final instructions
-    Write-Step "Setup Complete!"
+    Write-Step "Installation Complete!"
     Write-Success @"
-✅ AIResponder plugin has been successfully installed!
+✅ AIResponder successfully installed!
 
 NEXT STEPS:
 1. Restart Discord completely
-2. Go to Discord Settings > Vencord > Plugins
-3. Enable the 'AIResponder' plugin
-4. Configure your settings (optional)
-5. Click the AI icon in any DM to start using it!
+2. Settings > Vencord > Plugins > Enable 'AIResponder'
+3. Click AI icon in DMs to activate
+4. Optional: Get API key at openrouter.ai for unlimited usage
 
-OPTIONAL - GET YOUR OWN API KEY:
-• Visit: https://openrouter.ai
-• Sign up for free account
-• Get API key for unlimited usage (~1,000 requests/day limit removed)
-• Enable 'Use your own API key' in plugin settings
-
-SUPPORT:
-• Discord: https://discord.gg/aBvYsY2GnQ
-• Website: https://www.syva.uk/syva-dev/
-
-Enjoy your AI auto-responder! 🤖✨
+SUPPORT: discord.gg/aBvYsY2GnQ | www.syva.uk/syva-dev/
 "@
 
-    Write-Info "`nVencord installation directory: $vencordDir"
-    
+    Write-Info "Installation directory: $vencordDir"
     if ($inject -eq "n" -or $inject -eq "N") {
-        Write-Warning "Remember to run 'pnpm inject' in the Vencord directory to inject into Discord!"
+        Write-Warning "Run 'pnpm inject' in Vencord directory to complete setup"
     }
 }
 
-# Run main function
 try {
     Main
 }
 catch {
     Write-Error "Setup failed: $($_.Exception.Message)"
-    Write-Info "Please check the error above and try again, or install manually using the README.md guide."
     exit 1
 }
 finally {
-    # Return to original directory
-    if ($PWD.Path -ne $PSScriptRoot) {
-        Set-Location $PSScriptRoot
-    }
+    if ($PWD.Path -ne $PSScriptRoot) { Set-Location $PSScriptRoot }
 }
