@@ -51,7 +51,7 @@ function Install-NodeJS {
     
     if (Test-Command "node") {
         Write-Success "Node.js already installed: $(node --version)"
-        return
+        return $true
     }
     
     $nodeUrl = "https://nodejs.org/dist/v20.10.0/node-v20.10.0-x64.msi"
@@ -66,16 +66,18 @@ function Install-NodeJS {
         
         if (Test-Command "node") {
             Write-Success "Node.js installed successfully!"
+            Remove-Item $nodeInstaller -Force -ErrorAction SilentlyContinue
+            return $true
         } else {
             Write-Warning "Node.js installed but command not found. Restart terminal if needed."
+            Remove-Item $nodeInstaller -Force -ErrorAction SilentlyContinue
+            return $true
         }
-        
-        Remove-Item $nodeInstaller -Force -ErrorAction SilentlyContinue
     }
     catch {
         Write-Error "Failed to install Node.js: $($_.Exception.Message)"
         Write-Info "Install manually from https://nodejs.org/"
-        exit 1
+        return $false
     }
 }
 
@@ -84,7 +86,7 @@ function Install-Git {
     
     if (Test-Command "git") {
         Write-Success "Git already installed: $(git --version)"
-        return
+        return $true
     }
     
     $gitUrl = "https://github.com/git-for-windows/git/releases/download/v2.42.0.windows.2/Git-2.42.0.2-64-bit.exe"
@@ -99,16 +101,18 @@ function Install-Git {
         
         if (Test-Command "git") {
             Write-Success "Git installed successfully!"
+            Remove-Item $gitInstaller -Force -ErrorAction SilentlyContinue
+            return $true
         } else {
             Write-Warning "Git installed but command not found. Restart terminal if needed."
+            Remove-Item $gitInstaller -Force -ErrorAction SilentlyContinue
+            return $true
         }
-        
-        Remove-Item $gitInstaller -Force -ErrorAction SilentlyContinue
     }
     catch {
         Write-Error "Failed to install Git: $($_.Exception.Message)"
         Write-Info "Install manually from https://git-scm.com/"
-        exit 1
+        return $false
     }
 }
 
@@ -117,17 +121,18 @@ function Install-Pnpm {
     
     if (Test-Command "pnpm") {
         Write-Success "pnpm already installed: $(pnpm --version)"
-        return
+        return $true
     }
     
     try {
         Write-Info "Installing pnpm globally..."
         npm install -g pnpm
         Write-Success "pnpm installed successfully!"
+        return $true
     }
     catch {
         Write-Error "Failed to install pnpm: $($_.Exception.Message)"
-        exit 1
+        return $false
     }
 }
 
@@ -135,6 +140,7 @@ function Install-Vencord {
     param($InstallPath)
     
     Write-Step "Setting up Vencord"
+    Write-Info "Target path: $InstallPath"
     
     if (Test-Path "$InstallPath\package.json") {
         Write-Success "Vencord already exists at: $InstallPath"
@@ -142,26 +148,30 @@ function Install-Vencord {
     }
     
     $parentDir = Split-Path $InstallPath -Parent
-    if (!(Test-Path $parentDir)) {
-        New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
-    }
+    Write-Info "Parent directory: $parentDir"
     
     try {
+        if (!(Test-Path $parentDir)) {
+            Write-Info "Creating parent directory..."
+            New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+        }
+        
         Write-Info "Cloning Vencord repository..."
         Set-Location $parentDir
-        git clone https://github.com/Vendicated/Vencord.git (Split-Path $InstallPath -Leaf)
+        $folderName = Split-Path $InstallPath -Leaf
+        git clone https://github.com/Vendicated/Vencord.git $folderName
         
         if (Test-Path "$InstallPath\package.json") {
             Write-Success "Vencord cloned successfully!"
+            return $InstallPath
         } else {
-            throw "Vencord clone verification failed"
+            Write-Error "Vencord clone verification failed - package.json not found"
+            return $null
         }
-        
-        return $InstallPath
     }
     catch {
         Write-Error "Failed to clone Vencord: $($_.Exception.Message)"
-        exit 1
+        return $null
     }
 }
 
@@ -175,10 +185,11 @@ function Install-VencordDependencies {
         Write-Info "Installing dependencies..."
         pnpm install
         Write-Success "Dependencies installed successfully!"
+        return $true
     }
     catch {
         Write-Error "Failed to install dependencies: $($_.Exception.Message)"
-        exit 1
+        return $false
     }
 }
 
@@ -192,15 +203,15 @@ function Install-AIResponder {
     
     if (Test-Path "$aiResponderPath\index.tsx") {
         Write-Success "AIResponder plugin already exists!"
-        return
-    }
-    
-    if (!(Test-Path $userPluginsPath)) {
-        New-Item -ItemType Directory -Path $userPluginsPath -Force | Out-Null
-        Write-Info "Created userplugins directory"
+        return $true
     }
     
     try {
+        if (!(Test-Path $userPluginsPath)) {
+            New-Item -ItemType Directory -Path $userPluginsPath -Force | Out-Null
+            Write-Info "Created userplugins directory"
+        }
+        
         Write-Info "Cloning AIResponder plugin..."
         Set-Location $userPluginsPath
         
@@ -213,14 +224,16 @@ function Install-AIResponder {
         
         if (Test-Path "$aiResponderPath\index.tsx") {
             Write-Success "AIResponder plugin installed successfully!"
+            return $true
         } else {
-            throw "Plugin files not found after cloning"
+            Write-Error "Plugin files not found after cloning"
+            return $false
         }
     }
     catch {
         Write-Error "Failed to install AIResponder: $($_.Exception.Message)"
         Write-Info "Manual clone: https://github.com/tsx-awtns/vencord-ai-responder.git"
-        exit 1
+        return $false
     }
 }
 
@@ -234,10 +247,11 @@ function Build-Vencord {
         Write-Info "Building Vencord with AIResponder..."
         pnpm build
         Write-Success "Build completed successfully!"
+        return $true
     }
     catch {
         Write-Error "Build failed: $($_.Exception.Message)"
-        exit 1
+        return $false
     }
 }
 
@@ -252,10 +266,12 @@ function Inject-Vencord {
         Write-Warning "Press ENTER for default Discord path or enter custom path when prompted"
         pnpm inject
         Write-Success "Injection completed!"
+        return $true
     }
     catch {
         Write-Error "Injection failed: $($_.Exception.Message)"
         Write-Info "Run 'pnpm inject' manually in Vencord directory"
+        return $false
     }
 }
 
@@ -270,23 +286,72 @@ function Main {
     if (!(Test-Administrator)) {
         Write-Warning "Not running as Administrator. Some installations might fail."
         $continue = Read-Host "Continue? (y/N)"
-        if ($continue -ne "y" -and $continue -ne "Y") { exit 0 }
+        if ($continue -ne "y" -and $continue -ne "Y") { 
+            Write-Info "Exiting..."
+            exit 0 
+        }
     }
 
-    if (!$SkipNodeInstall) { Install-NodeJS }
-    if (!$SkipGitInstall) { Install-Git }
-    Install-Pnpm
+    if (!$SkipNodeInstall) { 
+        if (!(Install-NodeJS)) {
+            Write-Error "Node.js installation failed. Cannot continue."
+            Read-Host "Press Enter to exit"
+            exit 1
+        }
+    }
+    
+    if (!$SkipGitInstall) { 
+        if (!(Install-Git)) {
+            Write-Error "Git installation failed. Cannot continue."
+            Read-Host "Press Enter to exit"
+            exit 1
+        }
+    }
+    
+    if (!(Install-Pnpm)) {
+        Write-Error "pnpm installation failed. Cannot continue."
+        Read-Host "Press Enter to exit"
+        exit 1
+    }
     
     if ([string]::IsNullOrEmpty($VencordPath)) {
         $defaultPath = Join-Path $env:USERPROFILE "Desktop\Vencord"
-        $VencordPath = Read-Host "Vencord path (default: $defaultPath)"
-        if ([string]::IsNullOrEmpty($VencordPath)) { $VencordPath = $defaultPath }
+        Write-Info "Default installation path: $defaultPath"
+        $userInput = Read-Host "Enter Vencord installation path (or press Enter for default)"
+        
+        if ([string]::IsNullOrEmpty($userInput.Trim())) { 
+            $VencordPath = $defaultPath 
+        } else {
+            $VencordPath = $userInput.Trim()
+        }
     }
     
+    Write-Info "Using installation path: $VencordPath"
+    
     $vencordDir = Install-Vencord -InstallPath $VencordPath
-    Install-VencordDependencies -VencordPath $vencordDir
-    Install-AIResponder -VencordPath $vencordDir
-    Build-Vencord -VencordPath $vencordDir
+    if ($null -eq $vencordDir) {
+        Write-Error "Vencord installation failed. Cannot continue."
+        Read-Host "Press Enter to exit"
+        exit 1
+    }
+    
+    if (!(Install-VencordDependencies -VencordPath $vencordDir)) {
+        Write-Error "Dependency installation failed. Cannot continue."
+        Read-Host "Press Enter to exit"
+        exit 1
+    }
+    
+    if (!(Install-AIResponder -VencordPath $vencordDir)) {
+        Write-Error "AIResponder installation failed. Cannot continue."
+        Read-Host "Press Enter to exit"
+        exit 1
+    }
+    
+    if (!(Build-Vencord -VencordPath $vencordDir)) {
+        Write-Error "Build failed. Cannot continue."
+        Read-Host "Press Enter to exit"
+        exit 1
+    }
     
     Write-Info "`nSetup complete! Ready for injection."
     $inject = Read-Host "Inject Vencord into Discord now? (Y/n)"
@@ -311,6 +376,8 @@ SUPPORT: discord.gg/aBvYsY2GnQ | www.syva.uk/syva-dev/
     if ($inject -eq "n" -or $inject -eq "N") {
         Write-Warning "Run 'pnpm inject' in Vencord directory to complete setup"
     }
+    
+    Read-Host "`nPress Enter to exit"
 }
 
 try {
@@ -318,8 +385,12 @@ try {
 }
 catch {
     Write-Error "Setup failed: $($_.Exception.Message)"
+    Write-Error "Stack trace: $($_.ScriptStackTrace)"
+    Read-Host "Press Enter to exit"
     exit 1
 }
 finally {
-    if ($PWD.Path -ne $PSScriptRoot) { Set-Location $PSScriptRoot }
+    if ($PWD.Path -ne $PSScriptRoot) { 
+        try { Set-Location $PSScriptRoot } catch { }
+    }
 }
