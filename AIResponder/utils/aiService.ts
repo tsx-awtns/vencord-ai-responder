@@ -66,7 +66,7 @@ export async function generateAIResponse(
   channelId: string,
 ): Promise<string> {
   try {
-    const phpApiUrl = "https://www.syva.uk/syva-bot/api/openrouter.php"
+    const phpApiUrl = "https://www.syva.uk/syva-bot/vencord-api/openrouter.php"
     const history = getConversationHistory(channelId)
     const awayReason = awayReasons.get(channelId)
 
