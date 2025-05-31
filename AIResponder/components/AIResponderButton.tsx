@@ -57,11 +57,9 @@ export const AIResponderButton = ({ channel }) => {
         )
       }
     } else {
-      // If currently inactive, show modal to get away reason
       if (!isActive) {
         setShowModal(true)
       } else {
-        // If currently active, just disable
         toggleChannelAI(channel.id)
         setTimeout(() => {
           setIsActive(enabledChannels.has(channel.id))
