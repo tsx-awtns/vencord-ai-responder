@@ -7,18 +7,6 @@
  * @repository https://github.com/tsx-awtns/vencord-ai-responder
  * @version 2.7
  * @license MIT
- *
- * CHANGES v2.7:
- * - Updated to version 2.7 with synchronized client-server versioning
- * - Improved modular architecture with separated TypeScript files
- * - Enhanced error handling and connection stability
- * - Better conversation history management
- * - Optimized API request handling with proper headers
- * - Improved rate limiting and fallback mechanisms
- * - Enhanced debugging and logging capabilities
- * - Better state management across modules
- * - Improved UI responsiveness and user feedback
- * - Code cleanup and maintainability improvements
  */
 
 import { findByPropsLazy } from "@webpack"
@@ -36,7 +24,7 @@ export async function sendGreetingIfNeeded(channelId: string): Promise<void> {
     if (greetedChannels.has(channelId)) return
 
     const userName = getUserDisplayName()
-    const greetingMessage = generateGreetingMessage(userName)
+    const greetingMessage = generateGreetingMessage(userName, channelId)
 
     debugLog(`Sending greeting for ${userName} in channel ${channelId}`)
 
