@@ -4,7 +4,6 @@
 # Author: mays_024 (Linux port by ChatGPT)
 
 set -e
-
 GREEN="\e[32m"
 YELLOW="\e[33m"
 RED="\e[31m"
