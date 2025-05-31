@@ -11,7 +11,7 @@
 
 import definePlugin from "@utils/types"
 import { findByPropsLazy } from "@webpack"
-import { FluxDispatcher } from "@webpack/common"
+import { FluxDispatcher, React } from "@webpack/common"
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons"
 
 import { settings } from "./settings"
