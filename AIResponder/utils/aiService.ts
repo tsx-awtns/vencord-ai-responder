@@ -7,24 +7,12 @@
  * @repository https://github.com/tsx-awtns/vencord-ai-responder
  * @version 2.7
  * @license MIT
- *
- * CHANGES v2.7:
- * - Updated to version 2.7 with synchronized client-server versioning
- * - Improved modular architecture with separated TypeScript files
- * - Enhanced error handling and connection stability
- * - Better conversation history management
- * - Optimized API request handling with proper headers
- * - Improved rate limiting and fallback mechanisms
- * - Enhanced debugging and logging capabilities
- * - Better state management across modules
- * - Improved UI responsiveness and user feedback
- * - Code cleanup and maintainability improvements
  */
 
 import { showToast, Toasts } from "@webpack/common"
 import { settings } from "../settings"
 import { debugLog } from "./helpers"
-import { conversationHistory } from "./state"
+import { conversationHistory, awayReasons } from "./state"
 import type { ConversationMessage } from "../types"
 
 export function handleRateLimitError(useCustomKey: boolean, userName: string): void {
@@ -80,11 +68,13 @@ export async function generateAIResponse(
   try {
     const phpApiUrl = "https://www.syva.uk/syva-bot/api/openrouter.php"
     const history = getConversationHistory(channelId)
+    const awayReason = awayReasons.get(channelId)
 
-    const systemPrompt = `You are ${userName}'s AI assistant. ${userName} is currently away, so you're responding on their behalf. 
+    const systemPrompt = `You are ${userName}'s AI assistant. ${userName} is currently away${awayReason ? ` (${awayReason})` : ""}, so you're responding on their behalf. 
 
 IMPORTANT INSTRUCTIONS:
 - You are having a normal conversation with someone who messaged ${userName}
+${awayReason ? `- ${userName} is currently: ${awayReason}` : "- The user is currently away but didn't specify why"}
 - Answer their questions directly and helpfully
 - Be conversational, friendly, and engaging
 - Don't keep saying generic greetings - actually respond to what they're asking
@@ -95,6 +85,7 @@ IMPORTANT INSTRUCTIONS:
 - Act like a knowledgeable AI assistant, not just a greeting bot
 - VARY your responses - don't repeat the same phrases
 - Be creative and natural in your responses
+${awayReason ? `- You can mention that ${userName} is ${awayReason} if it's relevant to the conversation` : ""}
 
 Remember: RESPOND TO THEIR ACTUAL MESSAGE, don't just give generic responses!`
 
