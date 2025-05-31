@@ -99,133 +99,129 @@ The scripts are hosted on GitHub and are fully open source. You can review the c
 
 ---
 
-## 📖 Manual Installation
+📖 Manual Installation Guide (AIResponder v2.7)
 
-If the automated script doesn't work for you, or you prefer manual installation, follow this detailed guide.
+This guide explains how to manually install the AIResponder plugin for Vencord on Windows, macOS, and Linux.
 
-### 🎯 What is AIResponder?
+---
 
-AIResponder v2.7 is an intelligent Vencord plugin that automatically responds to Discord direct messages using AI when you're away, sleeping, at work, or simply unavailable. The plugin uses a default OpenRouter.ai API key provided by the developer, but you can also create and use your own API key for unlimited usage.
+🎯 What is AIResponder?
 
-### 🆕 **NEW: Global DM Mode (v2.7)**
+AIResponder v2.7 is an intelligent Vencord plugin that automatically responds to Discord direct messages using AI. It uses OpenRouter.ai and allows custom API keys for unlimited usage.
 
-**Enable for All DMs** - A powerful feature that allows the AI to respond to ALL your direct messages automatically:
-- **Requires your own custom API key** (for unlimited usage)
-- **One-click activation** - Enable once, works for all DMs
-- **Visual indicator** - Green dot and border when global mode is active
-- **Smart management** - Automatically handles all incoming DMs
+🆕 NEW: Global DM Mode
+- Respond to all incoming DMs
+- Requires your own API key
+- One-click activation
+- Visual indicator (green border)
+- Smart management for all DMs
 
-### ⚠️ Important: Daily Limits
+⚠️ Daily Limits
+- Free OpenRouter accounts have ~1,000 daily requests
+- Plugin shows a notification if limit is reached
+- You can create a new account with a different email to bypass the limit
 
-**OpenRouter.ai has daily limits of approximately 1,000 requests per day for free accounts.** When this limit is reached:
-- The plugin will show you a helpful notification
-- You can create a new free OpenRouter.ai account with a different email
-- Get a new API key from the new account
-- Update your API key in the plugin settings
+---
 
-### 📋 Prerequisites
-
-Before starting, make sure you have:
-- Windows, macOS, or Linux computer
+📋 Prerequisites (All Platforms)
+- Node.js (LTS version)
+- Git
+- pnpm
 - Internet connection
-- Administrator/sudo privileges (for some installations)
+- Admin/sudo privileges
 
-### 🛠️ Step 1: Install Required Software
+---
 
-#### Install Node.js
-1. Go to [nodejs.org](https://nodejs.org/)
-2. Download the **LTS version** (recommended)
-3. Run the installer and follow the setup wizard
-4. Restart your computer after installation
+🪟 WINDOWS INSTALLATION
 
-#### Install Git
-1. Go to [git-scm.com](https://git-scm.com/)
-2. Download Git for your operating system
-3. Run the installer with default settings
-4. Restart your computer after installation
+1. Install Node.js:
+   - Download from https://nodejs.org (LTS version)
+   - Install and restart your PC
 
-### 🚀 Step 2: Install Vencord
+2. Install Git:
+   - Download from https://git-scm.com and install with default settings
 
-#### Install pnpm globally
-1. Open **Terminal** (macOS/Linux) or **Command Prompt** (Windows)
-2. Run this command:
-   ````
+3. Install pnpm:
+   Open Command Prompt:
+   ```
    npm i -g pnpm
-   ````
-3. Wait for the installation to complete
+   ```
 
-#### Clone Vencord Repository
-1. Navigate to your Desktop or create a new folder where you want to install Vencord
-2. Open Terminal/Command Prompt in that location
-3. Run this command (this may take a few minutes):
-   ````
+4. Clone Vencord:
+   ```
    git clone https://github.com/Vendicated/Vencord
-   ````
-4. A folder named "vencord" should appear
-
-#### Install Vencord Dependencies
-1. Navigate into the vencord folder:
-   ````
-   cd vencord
-   ````
-2. Install dependencies:
-   ````
+   cd Vencord
    pnpm install
-   ````
-3. If prompted, select **"Y"** to confirm installation
+   ```
 
-### 📦 Step 3: Install AIResponder Plugin v2.7
+5. Download AIResponder Plugin:
+   - From: https://github.com/tsx-awtns/vencord-ai-responder
+   - Download ZIP, extract, and copy "AIResponder" folder into:
+     ```
+     vencord/src/userplugins/
+     ```
 
-#### Download the Plugin
-1. Go to the AIResponder repository: [https://github.com/tsx-awtns/vencord-ai-responder](https://github.com/tsx-awtns/vencord-ai-responder)
-2. Click the green **"Code"** button
-3. Select **"Download ZIP"**
-4. Extract the ZIP file to get the plugin files
-5. You will fine the files into AIResponder folder
-
-#### Install the Plugin
-1. Navigate to your vencord folder
-2. Go to the **"src"** folder
-3. Create a new folder called **"userplugins"** (if it doesn't exist)
-4. Copy the **"AIResponder"** folder from the extracted ZIP's **"AIResponder"** subfolder into the **"userplugins"** folder
-
-Your folder structure should look like:
-````
-vencord/
-├── src/
-│   ├── userplugins/
-│   │   └── AIResponder/
-│   │       ├── index.tsx
-│   │       ├── settings.ts
-│   │       ├── types/
-│   │       ├── utils/
-│   │       ├── components/
-│   │       └── (other plugin files)
-````
-
-### 🔨 Step 4: Build and Inject Vencord
-
-#### Build Vencord
-1. Go back to the main vencord folder
-2. Open Terminal/Command Prompt in the vencord folder
-3. Run the build command:
-   ````
+6. Build and Inject:
+   ```
    pnpm build
-   ````
-4. Wait for the build to complete successfully
-
-#### Inject Vencord into Discord
-1. Run the injection command:
-   ````
    pnpm inject
-   ````
-2. **Option 1**: Press **Enter** to use the default Discord installation path
-3. **Option 2**: Enter the correct path to your Discord installation if the default is incorrect
+   ```
 
-Common Discord paths:
-- **Windows**: `C:\Users\[Username]\AppData\Local\Discord`
-- **macOS**: `/Applications/Discord.app`
-- **Linux**: `/opt/discord` or `~/.local/share/discord`
+   Use default Discord path: 
+   `C:\Users\YourName\AppData\Local\Discord`
+
+---
+
+🐧 LINUX & 🍏 MACOS INSTALLATION
+
+1. Install Node.js:
+   - Linux (Debian/Ubuntu):
+     ```
+     sudo apt install nodejs npm
+     ```
+   - macOS (with Homebrew):
+     ```
+     brew install node
+     ```
+
+2. Install Git:
+   - Linux:
+     ```
+     sudo apt install git
+     ```
+   - macOS:
+     ```
+     brew install git
+     ```
+
+3. Install pnpm:
+   ```
+   npm i -g pnpm
+   ```
+
+4. Clone Vencord:
+   ```
+   git clone https://github.com/Vendicated/Vencord
+   cd Vencord
+   pnpm install
+   ```
+
+5. Download AIResponder Plugin:
+   - From: https://github.com/tsx-awtns/vencord-ai-responder
+   - Download ZIP, extract, and copy "AIResponder" folder into:
+     ```
+     vencord/src/userplugins/
+     ```
+
+6. Build and Inject:
+   ```
+   pnpm build
+   pnpm inject
+   ```
+
+   Use path:
+   - macOS: `/Applications/Discord.app`
+   - Linux: `/opt/discord` or `~/.local/share/discord`
 
 ---
 
