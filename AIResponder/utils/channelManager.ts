@@ -7,27 +7,15 @@
  * @repository https://github.com/tsx-awtns/vencord-ai-responder
  * @version 2.7
  * @license MIT
- *
- * CHANGES v2.7:
- * - Updated to version 2.7 with synchronized client-server versioning
- * - Improved modular architecture with separated TypeScript files
- * - Enhanced error handling and connection stability
- * - Better conversation history management
- * - Optimized API request handling with proper headers
- * - Improved rate limiting and fallback mechanisms
- * - Enhanced debugging and logging capabilities
- * - Better state management across modules
- * - Improved UI responsiveness and user feedback
- * - Code cleanup and maintainability improvements
  */
 
 import { showToast, Toasts } from "@webpack/common"
 import { settings } from "../settings"
 import { debugLog, getUserDisplayName } from "./helpers"
 import { stopTypingAnimation } from "./typingService"
-import { enabledChannels, processingChannels, greetedChannels, conversationHistory } from "./state"
+import { enabledChannels, processingChannels, greetedChannels, conversationHistory, awayReasons } from "./state"
 
-export function toggleChannelAI(channelId: string): boolean {
+export function toggleChannelAI(channelId: string, reason?: string): boolean {
   try {
     const wasActive = enabledChannels.has(channelId)
     const userName = getUserDisplayName()
@@ -37,6 +25,7 @@ export function toggleChannelAI(channelId: string): boolean {
       processingChannels.delete(channelId)
       greetedChannels.delete(channelId)
       conversationHistory.delete(channelId)
+      awayReasons.delete(channelId) 
       stopTypingAnimation(channelId)
 
       if (settings.store.showNotifications) {
@@ -50,11 +39,19 @@ export function toggleChannelAI(channelId: string): boolean {
       greetedChannels.delete(channelId)
       conversationHistory.delete(channelId)
 
-      if (settings.store.showNotifications) {
-        showToast(`AI Responder Enabled for ${userName}`, Toasts.Type.SUCCESS)
+      if (reason && reason.trim()) {
+        awayReasons.set(channelId, reason.trim())
+        debugLog(`Away reason set for ${userName}: ${reason.trim()}`)
+      } else {
+        awayReasons.delete(channelId)
       }
 
-      debugLog(`Enabled for ${userName} in channel ${channelId}`)
+      if (settings.store.showNotifications) {
+        const reasonText = reason && reason.trim() ? ` (${reason.trim()})` : ""
+        showToast(`AI Responder Enabled for ${userName}${reasonText}`, Toasts.Type.SUCCESS)
+      }
+
+      debugLog(`Enabled for ${userName} in channel ${channelId}`, { reason: reason || "none" })
       return true
     }
   } catch (error) {
