@@ -19,7 +19,11 @@ We apologize for the confusion. Please check the updated documentation for accur
 
 ### **NEW: One-Command Installation! ⚡**
 
-The easiest way to install AIResponder v2.7 is using our automated PowerShell script that handles everything for you.
+The easiest way to install AIResponder v2.7 is using our automated installation scripts that handle everything for you.
+
+---
+
+### 🪟 **Windows (PowerShell)**
 
 #### **Super Quick Setup:**
 
@@ -30,7 +34,7 @@ Open **PowerShell as Administrator** and run this single command:
 iex (iwr -UseBasicParsing "https://raw.githubusercontent.com/tsx-awtns/vencord-ai-responder/main/setup.ps1").Content
 ````
 
-**That's it!** The script will automatically:
+**That's it!** The script will automatically:  
 ✅ Install Node.js and Git (if needed)  
 ✅ Set up Vencord with AIResponder v2.7 plugin  
 ✅ Build and optionally inject into Discord  
@@ -49,29 +53,49 @@ iwr -Uri "https://raw.githubusercontent.com/tsx-awtns/vencord-ai-responder/main/
 iex "& { $(iwr -UseBasicParsing 'https://raw.githubusercontent.com/tsx-awtns/vencord-ai-responder/main/setup.ps1').Content } -VencordPath 'C:\MyVencord'"
 ````
 
-#### **Requirements for Automatic Installation:**
+#### **Requirements for Windows Installation:**
 - Windows 10/11 with PowerShell
 - Internet connection
 - **Run PowerShell as Administrator** (recommended)
 
-#### **Quick Start Steps:**
+---
 
-1. **Right-click on PowerShell** → **"Run as Administrator"**
-2. **Copy and paste** the one-line command above
-3. **Press Enter** and follow the prompts
-4. **Restart Discord** when complete
-5. **Enable the plugin** in Discord Settings > Vencord > Plugins > AIResponder
-6. **Start using it** by clicking the AI icon in any DM!
+### 🐧 **Linux / macOS (Bash)**
 
-#### **Security Note:**
-The script is hosted on GitHub and is open source. You can review the code at:
-https://github.com/tsx-awtns/vencord-ai-responder/blob/main/setup.ps1
+#### **Super Quick Setup:**
 
-#### **Troubleshooting Automatic Setup:**
-- **"Execution Policy Error"**: Run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` first
-- **"Access Denied"**: Make sure you're running PowerShell as Administrator
-- **"Cannot download"**: Check your internet connection and firewall settings
-- **Script fails**: Use the manual installation method below
+Open your terminal and run this command:
+
+````bash
+# One-line installation - downloads and runs the setup script automatically
+bash <(curl -fsSL https://raw.githubusercontent.com/tsx-awtns/vencord-ai-responder/main/setup.sh)
+````
+
+**That's it!** The script will automatically:  
+✅ Install Node.js, Git, and pnpm (if needed)  
+✅ Set up Vencord with AIResponder v2.7 plugin  
+✅ Build and optionally inject into Discord  
+
+#### **Alternative Linux Methods:**
+
+```bash
+# Download manually and run
+curl -O https://raw.githubusercontent.com/tsx-awtns/vencord-ai-responder/main/setup.sh
+chmod +x setup.sh
+./setup.sh
+```
+
+#### **Requirements for Linux/macOS Installation:**
+- curl and bash installed
+- Internet connection
+- Node.js ≥ v20, Git, and pnpm (auto-installed if missing)
+
+---
+
+### 🔐 Security Note:
+The scripts are hosted on GitHub and are fully open source. You can review the code at:  
+- [setup.ps1 (Windows)](https://github.com/tsx-awtns/vencord-ai-responder/blob/main/setup.ps1)  
+- [setup.sh (Linux/macOS)](https://github.com/tsx-awtns/vencord-ai-responder/blob/main/setup.sh)
 
 ---
 
