@@ -73,7 +73,6 @@ function Find-VencordDirectory {
     
     Write-Info "Searching for Vencord files in: $BasePath"
     
-    # Check if the base path itself contains Vencord files
     if (Test-Path "$BasePath\package.json") {
         $packageContent = Get-Content "$BasePath\package.json" -Raw | ConvertFrom-Json
         if ($packageContent.name -eq "vencord") {
@@ -82,7 +81,6 @@ function Find-VencordDirectory {
         }
     }
     
-    # Check common subdirectories
     $possiblePaths = @(
         "$BasePath\Vencord",
         "$BasePath\vencord",
@@ -105,7 +103,6 @@ function Find-VencordDirectory {
         }
     }
     
-    # Search recursively (max 2 levels deep)
     try {
         $foundPaths = Get-ChildItem -Path $BasePath -Recurse -Depth 2 -Name "package.json" -ErrorAction SilentlyContinue
         foreach ($packagePath in $foundPaths) {
@@ -259,7 +256,6 @@ function Install-Vencord {
     Write-Step "Setting up Vencord"
     
     try {
-        # First, try to find existing Vencord installation
         $vencordDir = Find-VencordDirectory -BasePath $InstallPath
         
         if ($vencordDir) {
@@ -267,17 +263,14 @@ function Install-Vencord {
             return $vencordDir
         }
         
-        # If not found, clone Vencord
         Write-Info "Vencord not found. Cloning Vencord repository..."
         
-        # Ensure the parent directory exists
         $parentDir = Split-Path $InstallPath -Parent
         if (!(Test-Path $parentDir)) {
             Write-Info "Creating directory: $parentDir"
             New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
         }
         
-        # Clone directly into the specified path
         $currentLocation = Get-Location
         Set-Location $parentDir
         
@@ -290,7 +283,6 @@ function Install-Vencord {
         git clone https://github.com/Vendicated/Vencord.git $targetDirName
         Set-Location $currentLocation
         
-        # Verify the installation
         if (Test-Path "$InstallPath\package.json") {
             $packageContent = Get-Content "$InstallPath\package.json" -Raw | ConvertFrom-Json
             if ($packageContent.name -eq "vencord") {
@@ -356,10 +348,8 @@ function Install-AIResponder {
             Remove-Item $aiResponderPath -Recurse -Force
         }
         
-        # Clone the repository and copy files from the AIResponder subfolder
         git clone https://github.com/tsx-awtns/vencord-ai-responder.git temp-airesponder
         
-        # Copy files from the AIResponder subfolder to the target location
         if (Test-Path "temp-airesponder\AIResponder") {
             Copy-Item "temp-airesponder\AIResponder" -Destination "AIResponder" -Recurse -Force
             Remove-Item "temp-airesponder" -Recurse -Force
