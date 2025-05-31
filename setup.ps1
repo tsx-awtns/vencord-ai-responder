@@ -1,3 +1,8 @@
+# PowerShell 
+
+# AIResponder Setup Script v2.7 (macOS/Linux)
+# Author: mays_024
+
 param(
     [switch]$SkipNodeInstall,
     [switch]$SkipGitInstall,
