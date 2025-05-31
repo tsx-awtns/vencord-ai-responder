@@ -1,4 +1,3 @@
-
 param(
     [switch]$SkipNodeInstall,
     [switch]$SkipGitInstall,
@@ -67,6 +66,68 @@ function Test-ValidPath {
     catch {
         return $false
     }
+}
+
+function Find-VencordDirectory {
+    param($BasePath)
+    
+    Write-Info "Searching for Vencord files in: $BasePath"
+    
+    # Check if the base path itself contains Vencord files
+    if (Test-Path "$BasePath\package.json") {
+        $packageContent = Get-Content "$BasePath\package.json" -Raw | ConvertFrom-Json
+        if ($packageContent.name -eq "vencord") {
+            Write-Success "Found Vencord in: $BasePath"
+            return $BasePath
+        }
+    }
+    
+    # Check common subdirectories
+    $possiblePaths = @(
+        "$BasePath\Vencord",
+        "$BasePath\vencord",
+        "$BasePath\Vencord-main",
+        "$BasePath\vencord-main"
+    )
+    
+    foreach ($path in $possiblePaths) {
+        if (Test-Path "$path\package.json") {
+            try {
+                $packageContent = Get-Content "$path\package.json" -Raw | ConvertFrom-Json
+                if ($packageContent.name -eq "vencord") {
+                    Write-Success "Found Vencord in: $path"
+                    return $path
+                }
+            }
+            catch {
+                continue
+            }
+        }
+    }
+    
+    # Search recursively (max 2 levels deep)
+    try {
+        $foundPaths = Get-ChildItem -Path $BasePath -Recurse -Depth 2 -Name "package.json" -ErrorAction SilentlyContinue
+        foreach ($packagePath in $foundPaths) {
+            $fullPath = Join-Path $BasePath $packagePath
+            $dirPath = Split-Path $fullPath -Parent
+            try {
+                $packageContent = Get-Content $fullPath -Raw | ConvertFrom-Json
+                if ($packageContent.name -eq "vencord") {
+                    Write-Success "Found Vencord in: $dirPath"
+                    return $dirPath
+                }
+            }
+            catch {
+                continue
+            }
+        }
+    }
+    catch {
+        Write-Warning "Could not search recursively in $BasePath"
+    }
+    
+    return $null
 }
 
 function Install-NodeJS {
@@ -162,7 +223,8 @@ function Get-VencordPath {
     
     while ($true) {
         try {
-            Write-Info "Enter Vencord installation path:"
+            Write-Info "Enter the path where Vencord is located (or should be installed):"
+            Write-Info "This should be the directory containing package.json or where you want to clone Vencord"
             Write-Info "Default: $defaultPath"
             Write-Info "Press ENTER for default, or type custom path:"
             
@@ -197,32 +259,50 @@ function Install-Vencord {
     Write-Step "Setting up Vencord"
     
     try {
-        if (Test-Path "$InstallPath\package.json") {
-            Write-Success "Vencord already exists at: $InstallPath"
-            return $InstallPath
+        # First, try to find existing Vencord installation
+        $vencordDir = Find-VencordDirectory -BasePath $InstallPath
+        
+        if ($vencordDir) {
+            Write-Success "Found existing Vencord installation at: $vencordDir"
+            return $vencordDir
         }
         
+        # If not found, clone Vencord
+        Write-Info "Vencord not found. Cloning Vencord repository..."
+        
+        # Ensure the parent directory exists
         $parentDir = Split-Path $InstallPath -Parent
         if (!(Test-Path $parentDir)) {
             Write-Info "Creating directory: $parentDir"
             New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
         }
         
-        Write-Info "Cloning Vencord repository..."
+        # Clone directly into the specified path
         $currentLocation = Get-Location
         Set-Location $parentDir
-        git clone https://github.com/Vendicated/Vencord.git (Split-Path $InstallPath -Leaf)
+        
+        $targetDirName = Split-Path $InstallPath -Leaf
+        if (Test-Path $InstallPath) {
+            Write-Warning "Directory $InstallPath already exists. Removing..."
+            Remove-Item $InstallPath -Recurse -Force
+        }
+        
+        git clone https://github.com/Vendicated/Vencord.git $targetDirName
         Set-Location $currentLocation
         
+        # Verify the installation
         if (Test-Path "$InstallPath\package.json") {
-            Write-Success "Vencord cloned successfully!"
-            return $InstallPath
-        } else {
-            throw "Vencord clone verification failed"
+            $packageContent = Get-Content "$InstallPath\package.json" -Raw | ConvertFrom-Json
+            if ($packageContent.name -eq "vencord") {
+                Write-Success "Vencord cloned successfully to: $InstallPath"
+                return $InstallPath
+            }
         }
+        
+        throw "Vencord clone verification failed - package.json not found or invalid"
     }
     catch {
-        Write-Error "Failed to clone Vencord: $($_.Exception.Message)"
+        Write-Error "Failed to setup Vencord: $($_.Exception.Message)"
         Read-Host "Press Enter to exit"
         exit 1
     }
