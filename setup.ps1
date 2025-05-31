@@ -1,6 +1,6 @@
 # PowerShell 
 
-# AIResponder Setup Script v2.7 (macOS/Linux)
+# AIResponder Setup Script v2.7 (Windows)
 # Author: mays_024
 
 param(
